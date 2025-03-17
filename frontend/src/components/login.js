@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom"; // Import Link for routing
 
 const Login = ({ role }) => {
   const [email, setEmail] = useState("");
@@ -65,6 +66,18 @@ const Login = ({ role }) => {
             Login
           </button>
         </form>
+
+        {/* Display Register Now link only for Supplier role */}
+        {role === "supplier" && (
+          <div className="mt-4 text-center">
+            <p>
+              New to our system?{" "}
+              <Link to="/register" className="text-blue-500 hover:underline">
+                Register Now
+              </Link>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
