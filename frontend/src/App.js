@@ -1,14 +1,19 @@
 import React from "react";
-import { BrowserRouter as Router } from "react-router-dom"; // Import BrowserRouter
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import RoleSelection from "./components/RoleSelection";
-import Login from "./components/login";
+import InventoryDashboard from "./pages/InventoryDashboard";
+import AddMedicines from "./pages/AddMedicines";
+import UpdateMedicine from "./pages/UpdateMedicine";
 
 function App() {
   return (
-    <Router>  {/* Wrap the application in BrowserRouter */}
-      <div className="flex justify-center items-center min-h-screen bg-gray-100">
-        <RoleSelection />
-      </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<RoleSelection />} />
+        <Route path="/dashboard" element={<InventoryDashboard />} />
+        <Route path="/add-item" element={<AddMedicines/>} />
+        <Route path="/update-medicine" element={<UpdateMedicine />} />
+      </Routes>
     </Router>
   );
 }
