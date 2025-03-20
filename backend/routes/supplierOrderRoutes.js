@@ -6,32 +6,19 @@ const router = express.Router();
 // 📌 1️⃣ Create a new Supplier Order
 router.post("/", async (req, res) => {
   try {
-    console.log("Request Body:", req.body);  // Log the body to check the data
-    
-    const { supplierId, orderDate = new Date(), medicines, orderStatus = "Pending" } = req.body;
+    const { supplierId, orderDate, expectedDeliveryDate, medicines, orderStatus } = req.body;
 
-    // Validate if at least one medicine is provided
     if (!medicines || medicines.length === 0) {
       return res.status(400).json({ error: "At least one medicine must be included in the order." });
-    }
-
-    // Validate each medicine (excluding expectedDeliveryDate)
-    for (const med of medicines) {
-      if (!med.medicineId || !med.orderedQuantity || !med.totalAmount) {
-        return res.status(400).json({ error: "Each medicine must have a valid medicineId, orderedQuantity, and totalAmount." });
-      }
     }
 
     // Calculate total amount from all medicines
     const totalAmount = medicines.reduce((sum, med) => sum + med.totalAmount, 0);
 
-    // Create the new order with an auto-generated orderId based on the current timestamp
-    const orderId = `ORD-${Date.now()}`;
-
     const newOrder = new SupplierOrder({
-      orderId,
       supplierId,
       orderDate,
+      expectedDeliveryDate,
       medicines,
       orderStatus,
       totalAmount,
@@ -40,7 +27,6 @@ router.post("/", async (req, res) => {
     const savedOrder = await newOrder.save();
     res.status(201).json(savedOrder);
   } catch (err) {
-    console.error("Error:", err.message);  // Log error details for debugging
     res.status(400).json({ error: err.message });
   }
 });
@@ -69,24 +55,16 @@ router.get("/:id", async (req, res) => {
 // 📌 4️⃣ Update Supplier Order details
 router.put("/:id", async (req, res) => {
   try {
-    const { medicines, orderStatus } = req.body;
-
-    // Validate each medicine (excluding expectedDeliveryDate)
-    for (const med of medicines) {
-      if (!med.medicineId || !med.orderedQuantity || !med.totalAmount) {
-        return res.status(400).json({ error: "Each medicine must have a valid medicineId, orderedQuantity, and totalAmount." });
-      }
-    }
+    const { medicines, orderStatus, expectedDeliveryDate, actualDeliveryDate } = req.body;
 
     let totalAmount = 0;
     if (medicines && medicines.length > 0) {
       totalAmount = medicines.reduce((sum, med) => sum + med.totalAmount, 0);
     }
 
-    // Update the order with the new data
     const updatedOrder = await SupplierOrder.findOneAndUpdate(
       { orderId: req.params.id },
-      { medicines, orderStatus, totalAmount },
+      { medicines, orderStatus, expectedDeliveryDate, actualDeliveryDate, totalAmount },
       { new: true }
     );
 
