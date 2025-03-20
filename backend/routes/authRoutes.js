@@ -3,9 +3,12 @@ const { register, login, loginCashier, registerCashier } = require("../controlle
 
 const router = express.Router();
 
-router.post("/register", register); // For system admins & suppliers
-router.post("/login", login); // For system admins & suppliers
-router.post("/login/cashier", loginCashier); // For cashiers
-router.post("/register/cashier", registerCashier); //  Add this line for cashier registration
+// Admin & Supplier Auth
+router.post("/register", register);
+router.post("/login", login);
+
+// Cashier Auth
+router.post("/login/cashier", loginCashier);
+router.post("/register/cashier", registerCashier);
 
 module.exports = router;
