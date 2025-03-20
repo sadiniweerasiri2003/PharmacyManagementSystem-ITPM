@@ -4,7 +4,8 @@ import { AlertTriangle, Package, PlusCircle, ShoppingCart, Edit, Trash } from "l
 import BarChartComponent from "../components/BarChartComponent"; // Import BarChartComponent
 import TopBoxes from "../components/TopBoxes"; // Import TopBoxes Component
 import MedicineList from "../components/MedicineList";
-
+import SearchMedicine from "../components/SearchMedicine"; // Import SearchMedicine Component
+import ReportGenerator from "../components/ReportGenerator";
 
 
 const Button = ({ children, className, onClick }) => (
@@ -16,6 +17,7 @@ const Button = ({ children, className, onClick }) => (
 export default function InventoryDashboard() {
   const navigate = useNavigate();
   const [medicines, setMedicines] = useState([]);
+  const [filteredMedicines, setFilteredMedicines] = useState([]); // State for search
   const [selectedMedicine, setSelectedMedicine] = useState(null);
   const [message, setMessage] = useState(null);
 
@@ -29,12 +31,18 @@ export default function InventoryDashboard() {
       if (response.ok) {
         const data = await response.json();
         setMedicines(data);
+        setFilteredMedicines(data); // Initialize filtered list
       } else {
         setMessage({ type: "error", text: "Failed to fetch medicines." });
       }
     } catch (error) {
       setMessage({ type: "error", text: "Error fetching data." });
     }
+  };
+
+  // Handle Search Function
+  const handleSearch = (filteredResults) => {
+    setFilteredMedicines(filteredResults);
   };
 
   const handleChange = (e) => {
@@ -86,25 +94,30 @@ export default function InventoryDashboard() {
       <h1 className="text-2xl font-bold mb-6">Pharmacy Inventory Dashboard</h1>
 
       <TopBoxes medicines={medicines} />
-
       <BarChartComponent data={medicines} />
-      {/* Add New Medicine Button */}
-      <Button
-        className="bg-blue-500 hover:bg-blue-600 text-white mb-6"
-        onClick={() => navigate("/add-item")}
-      >
-        Add New Medicine
-      </Button>
 
+     
 
+      {/* Buttons: Add Medicine & Generate Report */}
+      <div className="flex justify-between items-center mt-6">
+        <Button className="bg-blue-500 text-white" onClick={() => navigate("/add-item")}>
+          <PlusCircle className="inline-block mr-2" size={18} /> Add New Medicine
+        </Button>
+        <ReportGenerator medicines={medicines} />
+      </div>
 
-    
-      {/* Medicine List Component */}
+      {/* Search Medicine */}
+      <div className="mt-6">
+        <SearchMedicine medicines={medicines} onSearch={handleSearch} />
+      </div>
+
+      {/* Medicine List Component with Search Results */}
       <MedicineList
-        medicines={medicines}
+        medicines={filteredMedicines} // Use filtered results
         setSelectedMedicine={setSelectedMedicine}
         handleDelete={handleDelete}
       />
+
       {/* Update Medicine Form */}
       {selectedMedicine && (
         <div className="bg-white p-6 shadow-lg rounded-2xl">
@@ -113,7 +126,14 @@ export default function InventoryDashboard() {
           <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <label>
               Name:
-              <input type="text" name="name" value={selectedMedicine.name} className="p-2 border rounded w-full" onChange={handleChange} required />
+              <input
+                type="text"
+                name="name"
+                value={selectedMedicine.name}
+                className="p-2 border rounded w-full"
+                onChange={handleChange}
+                required
+              />
             </label>
             <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md mt-4">
               Update Medicine
