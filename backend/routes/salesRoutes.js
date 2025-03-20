@@ -72,12 +72,16 @@ router.put("/:orderid", async (req, res) => {
 router.delete("/:orderid", async (req, res) => {
     try {
         const deletedSale = await Sales.findOneAndDelete({ orderid: req.params.orderid });
-        if (!deletedSale) return res.status(404).json({ message: "Sale not found" });
+
+        if (!deletedSale) {
+            return res.status(404).json({ message: "Sale not found" });
+        }
 
         res.status(200).json({ message: "Sale deleted successfully" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 module.exports = router;
