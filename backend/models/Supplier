@@ -1,0 +1,30 @@
+const mongoose = require("mongoose");
+
+// Auto-incrementing supplierId logic
+const supplierSchema = new mongoose.Schema({
+  supplierId: { type: String, unique: true }, // Auto-generated
+  name: { type: String, required: true },
+  phoneNumber: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  address: { type: String, required: true },
+  leadTimeDays: { type: Number, default: 0 },
+  lastOrderDate: { type: Date, default: null },
+  totalOrdersSupplied: { type: Number, default: 0 },
+  rating: { type: Number, min: 0, max: 5, default: 0 },
+});
+
+// Auto-generate supplierId starting from "001"
+supplierSchema.pre("save", async function (next) {
+  if (!this.supplierId) {
+    const lastSupplier = await this.constructor.findOne().sort({ supplierId: -1 });
+    if (lastSupplier) {
+      let lastId = parseInt(lastSupplier.supplierId, 10);
+      this.supplierId = String(lastId + 1).padStart(3, "0"); // Increment ID
+    } else {
+      this.supplierId = "001"; // First supplier
+    }
+  }
+  next();
+});
+
+module.exports = mongoose.model("Supplier", supplierSchema);
