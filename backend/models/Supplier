@@ -21,7 +21,7 @@ supplierSchema.pre("save", async function (next) {
       let lastId = parseInt(lastSupplier.supplierId, 10);
       this.supplierId = String(lastId + 1).padStart(3, "0"); // Increment ID
     } else {
-      this.supplierId = "001"; // First supplier
+      this.supplierId = "SUP001"; // First supplier
     }
   }
   next();
