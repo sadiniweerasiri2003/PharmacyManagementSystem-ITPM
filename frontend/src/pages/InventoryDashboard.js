@@ -89,6 +89,10 @@ export default function InventoryDashboard() {
     }
   };
 
+  const handleEdit = (medicineId) => {
+    navigate(`/update-medicine/${medicineId}`);
+  };
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-2xl font-bold mb-6">Pharmacy Inventory Dashboard</h1>
@@ -114,33 +118,9 @@ export default function InventoryDashboard() {
       {/* Medicine List Component with Search Results */}
       <MedicineList
         medicines={filteredMedicines} // Use filtered results
-        setSelectedMedicine={setSelectedMedicine}
+        onEdit={handleEdit}  // Pass the new handler instead of setSelectedMedicine
         handleDelete={handleDelete}
       />
-
-      {/* Update Medicine Form */}
-      {selectedMedicine && (
-        <div className="bg-white p-6 shadow-lg rounded-2xl">
-          <h2 className="text-xl font-semibold mb-4">Update Medicine</h2>
-
-          <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label>
-              Name:
-              <input
-                type="text"
-                name="name"
-                value={selectedMedicine.name}
-                className="p-2 border rounded w-full"
-                onChange={handleChange}
-                required
-              />
-            </label>
-            <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md mt-4">
-              Update Medicine
-            </button>
-          </form>
-        </div>
-      )}
     </div>
   );
 }

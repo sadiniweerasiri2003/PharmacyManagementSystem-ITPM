@@ -12,7 +12,7 @@ function App() {
         <Route path="/" element={<RoleSelection />} />
         <Route path="/dashboard" element={<InventoryDashboard />} />
         <Route path="/add-item" element={<AddMedicines/>} />
-        <Route path="/update-medicine" element={<UpdateMedicine />} />
+        <Route path="/update-medicine/:id" element={<UpdateMedicine />} />
       </Routes>
     </Router>
   );

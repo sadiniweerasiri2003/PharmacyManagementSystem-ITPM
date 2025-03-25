@@ -1,41 +1,32 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
 const UpdateMedicine = () => {
-  const [medicines, setMedicines] = useState([]);
-  const [selectedId, setSelectedId] = useState("");
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [medicine, setMedicine] = useState(null);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetchMedicines();
+    fetchMedicine();
   }, []);
 
-  const fetchMedicines = async () => {
+  const fetchMedicine = async () => {
     try {
-      const response = await fetch("http://localhost:5001/api/medicines");
+      const response = await fetch(`http://localhost:5001/api/medicines/${id}`);
       if (response.ok) {
         const data = await response.json();
-        if (data.length > 0) {
-          setMedicines(data);
-        } else {
-          setMessage("No medicines found.");
-        }
+        setMedicine({
+          ...data,
+          expiryDate: data.expiryDate ? data.expiryDate.split("T")[0] : "",
+          lastRestockedDate: data.lastRestockedDate ? data.lastRestockedDate.split("T")[0] : "",
+        });
       } else {
-        setMessage("Failed to fetch medicines.");
+        setMessage("Failed to fetch medicine.");
       }
     } catch (error) {
       setMessage("Error fetching data.");
     }
-  };
-
-  const handleSelectChange = (e) => {
-    const selectedMedicine = medicines.find((med) => med._id === e.target.value);
-    setSelectedId(e.target.value);
-    setMedicine({
-      ...selectedMedicine,
-      expiryDate: selectedMedicine.expiryDate ? selectedMedicine.expiryDate.split("T")[0] : "",
-      lastRestockedDate: selectedMedicine.lastRestockedDate ? selectedMedicine.lastRestockedDate.split("T")[0] : "",
-    });
   };
 
   const handleChange = (e) => {
@@ -58,6 +49,10 @@ const UpdateMedicine = () => {
 
       if (response.ok) {
         setMessage("✅ Medicine updated successfully!");
+        // Add navigation after successful update
+        setTimeout(() => {
+          navigate('/dashboard'); // Update this to match your dashboard route
+        }, 1500);
       } else {
         setMessage("❌ Failed to update medicine.");
       }
@@ -67,28 +62,11 @@ const UpdateMedicine = () => {
   };
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-3xl bg-white shadow-lg rounded-2xl p-8">
+    <div className="p-8 bg-gray-50 min-h-screen">
+      <div className="w-full max-w-3xl mx-auto bg-white shadow-lg rounded-2xl p-8">
         <h2 className="text-3xl font-semibold text-blue-700 mb-6 text-center">Update Medicine</h2>
 
         {message && <p className="text-center text-lg font-medium text-red-500 mb-4">{message}</p>}
-
-        {/* Dropdown to select medicine */}
-        <div className="mb-6">
-          <label className="block text-gray-700 font-medium mb-2">Select Medicine:</label>
-          <select
-            className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={selectedId}
-            onChange={handleSelectChange}
-          >
-            <option value="">-- Select a Medicine --</option>
-            {medicines.map((med) => (
-              <option key={med._id} value={med._id}>
-                {med.name} (Batch: {med.batchNumber})
-              </option>
-            ))}
-          </select>
-        </div>
 
         {medicine ? (
           <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -186,7 +164,7 @@ const UpdateMedicine = () => {
             </div>
           </form>
         ) : (
-          <p className="text-center text-gray-600">Please select a medicine to update.</p>
+          <p className="text-center text-gray-600">Loading medicine data...</p>
         )}
       </div>
     </div>
