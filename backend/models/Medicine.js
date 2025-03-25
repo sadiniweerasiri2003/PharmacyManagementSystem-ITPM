@@ -5,14 +5,46 @@ const MedicineSchema = new mongoose.Schema(
     medicineId: { type: String, required: true, unique: true },
     name: { type: String, required: true },
     batchNumber: { type: String, required: true, unique: true },
-    expiryDate: { type: Date, required: true },
+    expiryDate: {
+      type: Date,
+      required: true,
+      validate: {
+        validator: function (value) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          return value > today;
+        },
+        message: "Expiry date must be in the future",
+      },
+    },
     price: { type: Number, required: true },
     quantity: { type: Number, required: true },
-    restockedDate: { type: Date, required: true },
+    restockedDate: {
+      type: Date,
+      required: true,
+      validate: {
+        validator: function (value) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          value.setHours(0, 0, 0, 0);
+          return value <= today;
+        },
+        message: "Restock date cannot be in the future",
+      },
+    },
     supplierId: { type: String, required: true },
   },
   { timestamps: true }
 );
+
+// Add validation for date relationships
+MedicineSchema.pre("save", function (next) {
+  if (this.restockedDate >= this.expiryDate) {
+    next(new Error("Restock date must be before expiry date"));
+    return;
+  }
+  next();
+});
 
 // Auto-generate medicineId and batchNumber before saving
 MedicineSchema.pre("save", async function (next) {

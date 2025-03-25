@@ -1,4 +1,5 @@
 const Medicine = require("../models/Medicine");
+const MedicinePurchase = require("../models/MedicinePurchase");
 
 // Function to generate the next medicineId and batchNumber
 const getNextMedicineIds = async () => {
@@ -27,22 +28,82 @@ const getNextMedicineIds = async () => {
     }
 };
 
+// Add this validation function
+const validateMedicineName = async (name) => {
+    const existingMedicine = await Medicine.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+    return !existingMedicine;
+};
+
 // ✅ Add a new medicine with correct auto-generated IDs
 exports.addMedicine = async (req, res) => {
     try {
-        const { medicineId, batchNumber } = await getNextMedicineIds();
+        // Validate medicine name
+        const isNameValid = await validateMedicineName(req.body.name);
+        if (!isNameValid) {
+            return res.status(400).json({ 
+                message: "Medicine with this name already exists",
+                field: "name"
+            });
+        }
 
+        // Get next available IDs
+        const { medicineId, batchNumber } = await getNextMedicineIds();
+        
+        // Parse dates
+        const expiryDate = new Date(req.body.expiryDate);
+        const restockedDate = new Date(req.body.restockedDate);
+
+        // Validate dates
+        if (restockedDate > new Date()) {
+            return res.status(400).json({ 
+                message: "Restock date cannot be in the future",
+                field: "restockedDate"
+            });
+        }
+
+        if (expiryDate <= new Date()) {
+            return res.status(400).json({ 
+                message: "Expiry date must be in the future",
+                field: "expiryDate"
+            });
+        }
+
+        // Create new medicine
         const newMedicine = new Medicine({
-            medicineId,  // Ensure the correct format
+            medicineId,
             batchNumber,
             ...req.body,
+            expiryDate,
+            restockedDate
         });
 
-        await newMedicine.save();
-        res.status(201).json(newMedicine);
+        const savedMedicine = await newMedicine.save();
+
+        // Create purchase record
+        const purchase = new MedicinePurchase({
+            medicineId: medicineId,
+            quantity: req.body.quantity,
+            price: req.body.price,
+            actionType: 'NEW',
+            lastStockDate: restockedDate,
+            expiryDate: expiryDate
+        });
+        
+        await purchase.save();
+
+        res.status(201).json(savedMedicine);
     } catch (error) {
         console.error("Error adding medicine:", error);
-        res.status(500).json({ message: "Internal server error" });
+        if (error.code === 11000) {
+            res.status(400).json({ 
+                message: "Duplicate medicine ID. Please try again.",
+                field: "medicineId"
+            });
+        } else {
+            res.status(500).json({ 
+                message: "Error adding medicine: " + error.message 
+            });
+        }
     }
 };
 
@@ -83,18 +144,80 @@ exports.getMedicineById = async (req, res) => {
 exports.updateMedicine = async (req, res) => {
     try {
         const existingMedicine = await Medicine.findById(req.params.id);
-        if (!existingMedicine) return res.status(404).json({ message: "Medicine not found" });
+        if (!existingMedicine) {
+            return res.status(404).json({ message: "Medicine not found" });
+        }
 
-        // Ensure medicineId and batchNumber remain unchanged
+        // Parse dates and create date objects
+        const expiryDate = new Date(req.body.expiryDate);
+        const restockedDate = new Date(req.body.restockedDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to start of day for fair comparison
+
+        // Format the dates to exclude time
+        restockedDate.setHours(0, 0, 0, 0);
+        expiryDate.setHours(0, 0, 0, 0);
+
+        // Validate restock date - allow today's date
+        if (restockedDate > today) {
+            return res.status(400).json({
+                message: "Restock date cannot be in the future",
+                field: "restockedDate"
+            });
+        }
+
+        // Validate expiry date
+        if (expiryDate <= today) {
+            return res.status(400).json({
+                message: "Expiry date must be in the future",
+                field: "expiryDate"
+            });
+        }
+
+        // Validate restock date is before expiry date
+        if (restockedDate >= expiryDate) {
+            return res.status(400).json({
+                message: "Restock date must be before expiry date",
+                field: "restockedDate"
+            });
+        }
+
+        // Create purchase record with validated dates
+        const purchase = new MedicinePurchase({
+            medicineId: existingMedicine.medicineId,
+            quantity: req.body.quantity,
+            price: req.body.price,
+            actionType: 'UPDATE',
+            lastStockDate: restockedDate,
+            expiryDate: expiryDate
+        });
+        await purchase.save();
+
+        // Update medicine with validated dates
         const updatedMedicine = await Medicine.findByIdAndUpdate(
             req.params.id,
-            { ...req.body, medicineId: existingMedicine.medicineId, batchNumber: existingMedicine.batchNumber },
-            { new: true }
+            {
+                ...req.body,
+                medicineId: existingMedicine.medicineId,
+                batchNumber: existingMedicine.batchNumber,
+                expiryDate: expiryDate,
+                restockedDate: restockedDate
+            },
+            { new: true, runValidators: true }
         );
 
         res.json(updatedMedicine);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Update error:", error);
+        // Send more detailed error message
+        res.status(500).json({
+            message: "Error updating medicine",
+            error: error.message,
+            details: error.errors ? Object.keys(error.errors).map(key => ({
+                field: key,
+                message: error.errors[key].message
+            })) : null
+        });
     }
 };
 
@@ -113,6 +236,16 @@ exports.getNextMedicineId = async (req, res) => {
     try {
         const nextIds = await getNextMedicineIds();
         res.json(nextIds);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Add new endpoint to get purchase history
+exports.getPurchaseHistory = async (req, res) => {
+    try {
+        const purchases = await MedicinePurchase.find().sort({ purchaseDate: -1 });
+        res.json(purchases);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

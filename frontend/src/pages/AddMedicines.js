@@ -15,6 +15,7 @@ const AddMedicines = () => {
   });
 
   const [message, setMessage] = useState(null);
+  const [errors, setErrors] = useState({});
 
   // Generate Medicine ID
   const generateMedicineId = async () => {
@@ -63,6 +64,7 @@ const AddMedicines = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
     try {
       const response = await fetch("http://localhost:5001/api/medicines", {
         method: "POST",
@@ -70,14 +72,20 @@ const AddMedicines = () => {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        setMessage("✅ Medicine added successfully!");
+        setMessage({ type: 'success', text: "✅ Medicine added successfully!" });
         setTimeout(() => navigate("/dashboard"), 1500);
       } else {
-        setMessage("❌ Failed to add medicine.");
+        // Handle specific error for duplicate medicine name
+        if (data.field === 'name') {
+          setErrors({ name: data.message });
+        }
+        setMessage({ type: 'error', text: "❌ " + data.message });
       }
     } catch (error) {
-      setMessage("❌ Error adding medicine.");
+      setMessage({ type: 'error', text: "❌ Error adding medicine." });
     }
   };
 
@@ -87,8 +95,10 @@ const AddMedicines = () => {
         <h2 className="text-xl font-semibold mb-4">Add New Medicine</h2>
 
         {message && (
-          <div className="p-2 mb-4 rounded bg-blue-100 text-blue-800">
-            {message}
+          <div className={`p-2 mb-4 rounded ${
+            message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
+            {message.text}
           </div>
         )}
 
@@ -122,9 +132,12 @@ const AddMedicines = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="p-2 border rounded w-full"
+              className={`p-2 border rounded w-full ${errors.name ? 'border-red-500' : ''}`}
               required
             />
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+            )}
           </div>
 
           <div>
