@@ -3,21 +3,26 @@ const SupplierOrder = require("../models/supplierOrder");
 
 const router = express.Router();
 
-// 📌 1️⃣ Create a new Supplier Order
+// Create a new Supplier Order
 router.post("/", async (req, res) => {
   try {
     const { supplierId, orderDate, expectedDeliveryDate, medicines, orderStatus } = req.body;
 
-    if (!medicines || medicines.length === 0) {
+    if (!medicines || !Array.isArray(medicines) || medicines.length === 0) {
       return res.status(400).json({ error: "At least one medicine must be included in the order." });
     }
 
-    // Calculate total amount from all medicines
-    const totalAmount = medicines.reduce((sum, med) => sum + med.totalAmount, 0);
+    // Validate medicine structure
+    if (!medicines.every(med => med.medicineId && med.orderedQuantity && med.totalAmount !== undefined)) {
+      return res.status(400).json({ error: "Invalid medicines format." });
+    }
+
+    // Calculate total amount
+    const totalAmount = medicines.reduce((sum, med) => sum + (med.totalAmount || 0), 0);
 
     const newOrder = new SupplierOrder({
       supplierId,
-      orderDate,
+      orderDate: orderDate || new Date(),
       expectedDeliveryDate,
       medicines,
       orderStatus,
@@ -31,7 +36,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 📌 2️⃣ Get all Supplier Orders
+// Get all Supplier Orders
 router.get("/", async (req, res) => {
   try {
     const orders = await SupplierOrder.find();
@@ -41,10 +46,10 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 📌 3️⃣ Get a single Supplier Order by ID
+// Get a single Supplier Order by _id (fixed from orderId)
 router.get("/:id", async (req, res) => {
   try {
-    const order = await SupplierOrder.findOne({ orderId: req.params.id });
+    const order = await SupplierOrder.findById(req.params.id);
     if (!order) return res.status(404).json({ error: "Order not found" });
     res.status(200).json(order);
   } catch (err) {
@@ -52,18 +57,18 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// 📌 4️⃣ Update Supplier Order details
+// Update Supplier Order details
 router.put("/:id", async (req, res) => {
   try {
     const { medicines, orderStatus, expectedDeliveryDate, actualDeliveryDate } = req.body;
 
     let totalAmount = 0;
     if (medicines && medicines.length > 0) {
-      totalAmount = medicines.reduce((sum, med) => sum + med.totalAmount, 0);
+      totalAmount = medicines.reduce((sum, med) => sum + (med.totalAmount || 0), 0);
     }
 
-    const updatedOrder = await SupplierOrder.findOneAndUpdate(
-      { orderId: req.params.id },
+    const updatedOrder = await SupplierOrder.findByIdAndUpdate(
+      req.params.id,
       { medicines, orderStatus, expectedDeliveryDate, actualDeliveryDate, totalAmount },
       { new: true }
     );
@@ -76,10 +81,10 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// 📌 5️⃣ Delete a Supplier Order
+// Delete a Supplier Order
 router.delete("/:id", async (req, res) => {
   try {
-    const deletedOrder = await SupplierOrder.findOneAndDelete({ orderId: req.params.id });
+    const deletedOrder = await SupplierOrder.findByIdAndDelete(req.params.id);
     if (!deletedOrder) return res.status(404).json({ error: "Order not found" });
     res.status(200).json({ message: "Order deleted successfully" });
   } catch (err) {

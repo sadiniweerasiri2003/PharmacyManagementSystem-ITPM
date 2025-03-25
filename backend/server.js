@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
 
+
 const authRoutes = require("./routes/authRoutes");
 const supplierRoutes = require("./routes/supplierRoutes");
 const supplierOrderRoutes = require("./routes/supplierOrderRoutes");
@@ -10,6 +11,8 @@ const supplierOrderRoutes = require("./routes/supplierOrderRoutes");
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+
 
 connectDB();
 
