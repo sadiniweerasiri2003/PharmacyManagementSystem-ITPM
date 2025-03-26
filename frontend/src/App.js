@@ -1,14 +1,17 @@
-import React from "react";
-import { BrowserRouter as Router } from "react-router-dom"; // Import BrowserRouter
-import RoleSelection from "./components/RoleSelection";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./components/login";
-
+import AdminDashboard from "./pages/AdminDashboard";
+import CashierDashboard from "./pages/CashierDashboard";
+import SupplierDashboard from "./pages/SupplierDashboard";
 function App() {
   return (
-    <Router>  {/* Wrap the application in BrowserRouter */}
-      <div className="flex justify-center items-center min-h-screen bg-gray-100">
-        <RoleSelection />
-      </div>
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/cashier-dashboard" element={<CashierDashboard />} />
+        <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
+      </Routes>
     </Router>
   );
 }

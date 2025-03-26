@@ -1,11 +1,11 @@
-const express = require("express");
-const { register, login, loginCashier, registerCashier } = require("../controllers/authController");
-
+const express = require('express');
+const { registerUser, loginUser } = require('../controllers/authController');
+const { authenticate, isAdmin } = require('../middleware/authMiddleware');
 const router = express.Router();
 
-router.post("/register", register); // For system admins & suppliers
-router.post("/login", login); // For system admins & suppliers
-router.post("/login/cashier", loginCashier); // For cashiers
-router.post("/register/cashier", registerCashier); //  Add this line for cashier registration
+// Register route
+router.post('/register', registerUser);
+// Login route
+router.post('/login', loginUser);
 
 module.exports = router;
