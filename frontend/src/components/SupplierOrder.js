@@ -116,7 +116,7 @@ const SupplierOrders = () => {
         >
           <option value="Pending">Pending</option>
           
-          <option value="Cancelled">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
           <option value="Completed">Completed</option>
         </select>
         <button type="submit" className="bg-blue-500 text-white px-4 py-2">
