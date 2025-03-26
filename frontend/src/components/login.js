@@ -1,84 +1,43 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { Link } from "react-router-dom"; // Import Link for routing
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const Login = ({ role }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+const Login = () => {
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage("");
+    const response = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
 
-    try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
+    const data = await response.json();
+    if (response.ok) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.role);
 
-      alert("Login Successful!");
-      localStorage.setItem("token", response.data.token);
-      window.location.href = "/";
-    } catch (error) {
-      setErrorMessage(error.response?.data?.message || "Login failed");
+      if (data.role === "admin") navigate("/admin-dashboard");
+      else if (data.role === "cashier") navigate("/cashier-dashboard");
+      else if (data.role === "supplier") navigate("/supplier-dashboard");
+    } else {
+      alert("Invalid credentials");
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h2 className="text-2xl font-semibold text-center mb-4">{role} Login</h2>
-
-        {errorMessage && (
-          <div className="bg-red-500 text-white p-2 rounded mb-4">{errorMessage}</div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded mt-2"
-              placeholder="Enter email"
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded mt-2"
-              placeholder="Enter password"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-          >
-            Login
-          </button>
-        </form>
-
-        {/* Display Register Now link only for Supplier role */}
-        {role === "supplier" && (
-          <div className="mt-4 text-center">
-            <p>
-              New to our system?{" "}
-              <Link to="/register" className="text-blue-500 hover:underline">
-                Register Now
-              </Link>
-            </p>
-          </div>
-        )}
-      </div>
+    <div>
+      <h2>Admin & Cashier Login</h2>
+      <form onSubmit={handleSubmit}>
+        <input type="email" name="email" placeholder="Email" onChange={handleChange} required />
+        <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
+        <button type="submit">Login</button>
+      </form>
     </div>
   );
 };
