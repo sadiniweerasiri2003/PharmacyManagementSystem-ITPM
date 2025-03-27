@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+// Create the user schema
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -14,21 +15,43 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ['admin', 'cashier','supplier'],
+    enum: ['admin', 'cashier', 'supplier'],
+  },
+  cashierId: {
+    type: String,
+    unique: true,
   },
 });
 
-// Hash the password before saving to the database
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+// Static method to generate a cashier ID
+userSchema.statics.generateCashierId = async function () {
+  const count = await this.countDocuments({ role: 'cashier' });
+  const newCashierId = `C${(count + 1).toString().padStart(3, '0')}`;
+  return newCashierId;
+};
 
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (err) {
-    next(err);
+// Pre-save hook to auto-generate the cashier ID for cashiers
+userSchema.pre('save', async function (next) {
+  if (this.role === 'cashier' && !this.cashierId) {
+    try {
+      // Generate a cashier ID
+      this.cashierId = await this.constructor.generateCashierId();
+    } catch (err) {
+      return next(err);
+    }
   }
+
+  // Hash the password before saving
+  if (this.isModified('password')) {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+    } catch (err) {
+      return next(err);
+    }
+  }
+
+  next();
 });
 
 // Method to compare entered password with the stored hash
