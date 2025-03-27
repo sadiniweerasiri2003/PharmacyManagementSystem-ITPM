@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/sales"; // Change the port if needed
+const API_URL = "http://localhost:5001/api/sales"; // Change the port if needed
 
 // Create a new sale
 export const createSale = async (saleData) => {
