@@ -28,6 +28,8 @@ const SupplierOrders = () => {
     setLoading(false);
   };
 
+  
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -135,8 +137,8 @@ const SupplierOrders = () => {
           </tr>
         </thead>
         <tbody>
-          {orders.map((order) => (
-            <tr key={order._id}>
+        {orders.map((order, index) => (
+          <tr key={order._id || index}>
               <td className="border p-2">{order._id}</td>
               <td className="border p-2">{order.supplierId}</td>
               <td className="border p-2">{new Date(order.orderDate).toLocaleDateString()}</td>

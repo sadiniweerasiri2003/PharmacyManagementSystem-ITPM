@@ -20,7 +20,17 @@ router.post("/", async (req, res) => {
     // Calculate total amount
     const totalAmount = medicines.reduce((sum, med) => sum + (med.totalAmount || 0), 0);
 
+    // Get the last order and auto-generate orderId
+    const lastOrder = await SupplierOrder.findOne().sort({ orderId: -1 }).lean();
+    let orderId = "001"; // Default for first order
+
+    if (lastOrder && !isNaN(lastOrder.orderId)) {
+      let lastId = parseInt(lastOrder.orderId, 10);
+      orderId = String(lastId + 1).padStart(3, "0"); // Ensuring 3-digit format (e.g., 001, 002, ..., 999)
+    }
+
     const newOrder = new SupplierOrder({
+      orderId,
       supplierId,
       orderDate: orderDate || new Date(),
       expectedDeliveryDate,
@@ -46,10 +56,10 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get a single Supplier Order by _id (fixed from orderId)
+// Get a single Supplier Order by orderId
 router.get("/:id", async (req, res) => {
   try {
-    const order = await SupplierOrder.findById(req.params.id);
+    const order = await SupplierOrder.findOne({ orderId: req.params.id });
     if (!order) return res.status(404).json({ error: "Order not found" });
     res.status(200).json(order);
   } catch (err) {
@@ -67,8 +77,8 @@ router.put("/:id", async (req, res) => {
       totalAmount = medicines.reduce((sum, med) => sum + (med.totalAmount || 0), 0);
     }
 
-    const updatedOrder = await SupplierOrder.findByIdAndUpdate(
-      req.params.id,
+    const updatedOrder = await SupplierOrder.findOneAndUpdate(
+      { orderId: req.params.id },
       { medicines, orderStatus, expectedDeliveryDate, actualDeliveryDate, totalAmount },
       { new: true }
     );
@@ -84,12 +94,17 @@ router.put("/:id", async (req, res) => {
 // Delete a Supplier Order
 router.delete("/:id", async (req, res) => {
   try {
-    const deletedOrder = await SupplierOrder.findByIdAndDelete(req.params.id);
+    const deletedOrder = await SupplierOrder.findOneAndDelete({
+      $or: [{ orderId: req.params.id }, { _id: req.params.id }]
+    });
+
     if (!deletedOrder) return res.status(404).json({ error: "Order not found" });
+
     res.status(200).json({ message: "Order deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 module.exports = router;
