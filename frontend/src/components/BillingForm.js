@@ -174,15 +174,6 @@ const BillingForm = () => {
                 </button>
             </form>
 
-            <h2 className="text-xl font-bold mt-6">Sales Records</h2>
-            <ul className="mt-4">
-                {sales.map((sale) => (
-                    <li key={sale.orderid} className="flex justify-between items-center p-2 border-b">
-                        <span>{sale.orderid} - ${sale.totalprice}</span>
-                        <button onClick={() => handleDelete(sale.orderid)} className="text-red-500">Delete</button>
-                    </li>
-                ))}
-            </ul>
         </div>
     );
 };
