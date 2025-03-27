@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
+const salesRoutes = require("./routes/salesRoutes");
 
 
 dotenv.config(); // Load environment variables
@@ -26,6 +27,7 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use("/api/sales", salesRoutes);
 
 
 // Start the server
