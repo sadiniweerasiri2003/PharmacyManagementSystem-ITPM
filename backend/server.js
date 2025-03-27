@@ -1,13 +1,12 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const cors = require('cors');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const mongoose = require("mongoose");
+const connectDB = require("./config/db");
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
 const salesRoutes = require("./routes/salesRoutes");
-
-
-dotenv.config(); // Load environment variables
+const medicineRoutes = require("./routes/medicineRoutes");
 
 const app = express();
 
@@ -28,10 +27,11 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 // Routes
 app.use('/api/auth', authRoutes);
 app.use("/api/sales", salesRoutes);
-
+app.use("/api/medicines", medicineRoutes);
 
 // Start the server
 const port = process.env.PORT || 5001;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
