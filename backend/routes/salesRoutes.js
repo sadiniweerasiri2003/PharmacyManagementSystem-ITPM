@@ -5,7 +5,7 @@ const Sales = require("../models/Sales");
 // 📌 CREATE a new sale (POST)
 router.post("/", async (req, res) => {
     try {
-        const { orderid, medicineid = "M001", qty_sold, unitprice, payment_type, cashier_id = "CASHIER_001" } = req.body;
+        const { orderid, medicineId = "M001", qty_sold, unitprice, payment_type, cashier_id = "CASHIER_001" } = req.body;
 
         // Calculate total price
         const totalprice = qty_sold * unitprice;
@@ -13,7 +13,7 @@ router.post("/", async (req, res) => {
         // Create a new sale entry with dummy medicineid and cashier_id
         const newSale = new Sales({
             orderid,
-            medicineid,  // Using dummy value for medicineid
+            medicineId,  // Using dummy value for medicineid
             qty_sold,
             unitprice,
             totalprice,
@@ -31,7 +31,7 @@ router.post("/", async (req, res) => {
 // 📌 READ all sales (GET)
 router.get("/", async (req, res) => {
     try {
-        const sales = await Sales.find().populate("medicineid", "medicine_name current_stock");
+        const sales = await Sales.find().populate("medicineId", "medicine_name current_stock");
         res.status(200).json(sales);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -41,7 +41,7 @@ router.get("/", async (req, res) => {
 // 📌 READ single sale by orderid (GET)
 router.get("/:orderid", async (req, res) => {
     try {
-        const sale = await Sales.findOne({ orderid: req.params.orderid }).populate("medicineid");
+        const sale = await Sales.findOne({ orderid: req.params.orderid }).populate("medicineId");
         if (!sale) return res.status(404).json({ message: "Sale not found" });
         res.status(200).json(sale);
     } catch (error) {

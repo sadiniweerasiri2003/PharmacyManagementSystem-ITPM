@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const SalesSchema = new mongoose.Schema({
     orderid: { type: String, required: true, unique: true },
-    medicineid: { type: String, required: true, default: 'M001' }, // Dummy value (string format)
+    medicineId: { type: String, required: true, default: 'M001' }, // Dummy value (string format)
     qty_sold: { type: Number, required: true },
     unitprice: { type: Number, required: true },
     totalprice: { type: Number, required: true },
