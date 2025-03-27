@@ -2,10 +2,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const connectDB = require("./config/db");
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
-
-
+const supplierRoutes = require("./routes/supplierRoutes");
+const supplierOrderRoutes = require("./routes/supplierOrderRoutes");
 dotenv.config(); // Load environment variables
 
 const app = express();
@@ -13,6 +14,11 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(bodyParser.json()); // Parse JSON bodies
+
+
+
+connectDB();
+
 
 // MongoDB connection
 const uri = process.env.MONGO_URI;
@@ -26,6 +32,8 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use("/api/suppliers", supplierRoutes);
+app.use("/api/supplierorders", supplierOrderRoutes);
 
 
 // Start the server
