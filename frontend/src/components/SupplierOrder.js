@@ -8,6 +8,7 @@ const SupplierOrders = () => {
     expectedDeliveryDate: "",
     medicines: "",
     orderStatus: "Pending",
+    orderId: "", // Added to keep track of the order being edited
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -35,13 +36,12 @@ const SupplierOrders = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Convert medicines input to proper format
     const formattedMedicines = form.medicines
       ? form.medicines.split(",").map((med) => ({
           medicineId: med.trim(),
-          orderedQuantity: 1, // Default quantity (Change if required)
+          orderedQuantity: 1, // Default quantity
           receivedQuantity: 0,
-          totalAmount: 100, // Set an example price (Adjust as needed)
+          totalAmount: 100, // Example price
         }))
       : [];
 
@@ -54,11 +54,17 @@ const SupplierOrders = () => {
     };
 
     try {
-      await axios.post("http://localhost:5000/api/supplierorders", requestData);
-      setForm({ supplierId: "", expectedDeliveryDate: "", medicines: "", orderStatus: "Pending" });
+      if (form.orderId) {
+        // Edit existing order
+        await axios.put(`http://localhost:5000/api/supplierorders/${form.orderId}`, requestData);
+        setForm({ supplierId: "", expectedDeliveryDate: "", medicines: "", orderStatus: "Pending", orderId: "" });
+      } else {
+        // Create new order
+        await axios.post("http://localhost:5000/api/supplierorders", requestData);
+      }
       fetchOrders();
     } catch (err) {
-      setError("Error adding order. Check console for details.");
+      setError("Error saving order.");
       console.error("API Error:", err.response ? err.response.data : err.message);
     }
   };
@@ -71,6 +77,16 @@ const SupplierOrders = () => {
       setError("Error deleting order.");
       console.error(err);
     }
+  };
+
+  const handleEdit = (order) => {
+    setForm({
+      supplierId: order.supplierId,
+      expectedDeliveryDate: order.expectedDeliveryDate,
+      medicines: order.medicines.map((med) => med.medicineId).join(", "), // Assuming medicines is an array of objects with `medicineId`
+      orderStatus: order.orderStatus,
+      orderId: order._id, // Set the orderId for updating the specific order
+    });
   };
 
   return (
@@ -126,7 +142,7 @@ const SupplierOrders = () => {
           type="submit"
           className="mt-4 w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
         >
-          Add Order
+          {form.orderId ? "Update Order" : "Add Order"}
         </button>
       </form>
 
@@ -143,8 +159,8 @@ const SupplierOrders = () => {
             </tr>
           </thead>
           <tbody className="text-gray-700">
-            {orders.map((order, index) => (
-              <tr key={order._id || index} className="border-b hover:bg-gray-100">
+            {orders.map((order) => (
+              <tr key={order._id} className="border-b hover:bg-gray-100">
                 <td className="py-3 px-6">{order._id}</td>
                 <td className="py-3 px-6">{order.supplierId}</td>
                 <td className="py-3 px-6">{new Date(order.orderDate).toLocaleDateString()}</td>
@@ -162,6 +178,12 @@ const SupplierOrders = () => {
                   </span>
                 </td>
                 <td className="py-3 px-6">
+                  <button
+                    onClick={() => handleEdit(order)}
+                    className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition duration-300 mr-2"
+                  >
+                    Edit
+                  </button>
                   <button
                     onClick={() => handleDelete(order._id)}
                     className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition duration-300"
