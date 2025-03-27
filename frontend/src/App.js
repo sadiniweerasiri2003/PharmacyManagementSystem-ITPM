@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/login";
 import SupplierOrder from "./components/SupplierOrder";
+import PreviousSupplierOrders from "./components/PreviousSupplierOrders";
 import AdminDashboard from "./pages/AdminDashboard";
 import CashierDashboard from "./pages/CashierDashboard";
 import SupplierDashboard from "./pages/SupplierDashboard";
@@ -16,6 +17,7 @@ function App() {
           <Route path="/cashier-dashboard" element={<CashierDashboard />} />
           <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
           <Route path="/orders" element={<SupplierOrder />} />
+          <Route path="/previous-orders" element={<PreviousSupplierOrders />} />
         </Routes>
       </div>
     </Router>

@@ -28,26 +28,23 @@ const SupplierOrders = () => {
     setLoading(false);
   };
 
-  
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Convert medicines input to proper format
     const formattedMedicines = form.medicines
       ? form.medicines.split(",").map((med) => ({
           medicineId: med.trim(),
           orderedQuantity: 1, // Default quantity (Change if required)
           receivedQuantity: 0,
-          totalAmount: 100 // Set an example price (Adjust as needed)
+          totalAmount: 100, // Set an example price (Adjust as needed)
         }))
       : [];
-  
+
     const requestData = {
       supplierId: form.supplierId,
       expectedDeliveryDate: form.expectedDeliveryDate,
@@ -55,7 +52,7 @@ const SupplierOrders = () => {
       medicines: formattedMedicines,
       orderStatus: form.orderStatus,
     };
-  
+
     try {
       await axios.post("http://localhost:5000/api/supplierorders", requestData);
       setForm({ supplierId: "", expectedDeliveryDate: "", medicines: "", orderStatus: "Pending" });
@@ -65,7 +62,6 @@ const SupplierOrders = () => {
       console.error("API Error:", err.response ? err.response.data : err.message);
     }
   };
-  
 
   const handleDelete = async (orderId) => {
     try {
@@ -78,80 +74,106 @@ const SupplierOrders = () => {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Supplier Orders</h1>
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Supplier Orders</h1>
 
-      {error && <p className="text-red-500">{error}</p>}
-      {loading && <p>Loading orders...</p>}
+      {error && <p className="text-red-500 text-center">{error}</p>}
+      {loading && <p className="text-center text-gray-500">Loading orders...</p>}
 
-      <form onSubmit={handleSubmit} className="mb-4 p-4 border rounded">
-        <input
-          type="text"
-          name="supplierId"
-          placeholder="Supplier ID"
-          value={form.supplierId}
-          onChange={handleChange}
-          className="border p-2 mr-2"
-          required
-        />
-        <input
-          type="date"
-          name="expectedDeliveryDate"
-          value={form.expectedDeliveryDate}
-          onChange={handleChange}
-          className="border p-2 mr-2"
-          required
-        />
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input
+            type="text"
+            name="supplierId"
+            placeholder="Supplier ID"
+            value={form.supplierId}
+            onChange={handleChange}
+            className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          <input
+            type="date"
+            name="expectedDeliveryDate"
+            value={form.expectedDeliveryDate}
+            onChange={handleChange}
+            className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
         <input
           type="text"
           name="medicines"
           placeholder="Medicines (comma separated)"
           value={form.medicines}
           onChange={handleChange}
-          className="border p-2 mr-2"
+          className="border border-gray-300 p-3 rounded-lg w-full mt-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+
         <select
           name="orderStatus"
           value={form.orderStatus}
           onChange={handleChange}
-          className="border p-2 mr-2"
+          className="border border-gray-300 p-3 rounded-lg w-full mt-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="Pending">Pending</option>
-          
           <option value="Cancelled">Cancelled</option>
           <option value="Completed">Completed</option>
         </select>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2">
+
+        <button
+          type="submit"
+          className="mt-4 w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
+        >
           Add Order
         </button>
       </form>
 
-      <table className="w-full border-collapse border">
-        <thead>
-          <tr>
-            <th className="border p-2">Order ID</th>
-            <th className="border p-2">Supplier ID</th>
-            <th className="border p-2">Order Date</th>
-            <th className="border p-2">Status</th>
-            <th className="border p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-        {orders.map((order, index) => (
-          <tr key={order._id || index}>
-              <td className="border p-2">{order._id}</td>
-              <td className="border p-2">{order.supplierId}</td>
-              <td className="border p-2">{new Date(order.orderDate).toLocaleDateString()}</td>
-              <td className="border p-2">{order.orderStatus}</td>
-              <td className="border p-2">
-                <button onClick={() => handleDelete(order._id)} className="bg-red-500 text-white px-2 py-1">
-                  Delete
-                </button>
-              </td>
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+          <thead className="bg-blue-500 text-white">
+            <tr>
+              <th className="py-3 px-6 text-left">Order ID</th>
+              <th className="py-3 px-6 text-left">Supplier ID</th>
+              <th className="py-3 px-6 text-left">Order Date</th>
+              <th className="py-3 px-6 text-left">Status</th>
+              <th className="py-3 px-6 text-left">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="text-gray-700">
+            {orders.map((order, index) => (
+              <tr key={order._id || index} className="border-b hover:bg-gray-100">
+                <td className="py-3 px-6">{order._id}</td>
+                <td className="py-3 px-6">{order.supplierId}</td>
+                <td className="py-3 px-6">{new Date(order.orderDate).toLocaleDateString()}</td>
+                <td className="py-3 px-6">
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      order.orderStatus === "Pending"
+                        ? "bg-yellow-200 text-yellow-700"
+                        : order.orderStatus === "Completed"
+                        ? "bg-green-200 text-green-700"
+                        : "bg-red-200 text-red-700"
+                    }`}
+                  >
+                    {order.orderStatus}
+                  </span>
+                </td>
+                <td className="py-3 px-6">
+                  <button
+                    onClick={() => handleDelete(order._id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition duration-300"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
