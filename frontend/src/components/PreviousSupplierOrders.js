@@ -1,39 +1,27 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
 
-const PreviousSupplierOrders = () => {
+const PreviousSupplierOrder = () => {
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchOrders();
+    fetch("http://localhost:5001/api/supplierorders")
+      .then((response) => response.json())
+      .then((data) => {
+        // Filter orders that are "Completed" or "Cancelled"
+        const previousOrders = data.filter(order => 
+          order.orderStatus === "Completed" || order.orderStatus === "Cancelled"
+        );
+        setOrders(previousOrders);
+      })
+      .catch((error) => console.error("Error fetching orders:", error));
   }, []);
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get("http://localhost:5001/api/supplierorders");
-      const completedOrders = response.data.filter(order => order.orderStatus === "Completed");
-      setOrders(completedOrders);
-    } catch (err) {
-      setError("Error fetching orders.");
-      console.error(err);
-    }
-    setLoading(false);
-  };
-
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Previous Supplier Orders</h1>
-
-      {error && <p className="text-red-500 text-center">{error}</p>}
-      {loading && <p className="text-center text-gray-500">Loading orders...</p>}
-
-      {/* Table */}
+    <div>
+      <h2 className="text-xl font-bold">Previous Supplier Orders</h2>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-          <thead className="bg-gray-800 text-white">
+          <thead className="bg-blue-500 text-white">
             <tr>
               <th className="py-3 px-6 text-left">Order ID</th>
               <th className="py-3 px-6 text-left">Supplier ID</th>
@@ -42,16 +30,12 @@ const PreviousSupplierOrders = () => {
             </tr>
           </thead>
           <tbody className="text-gray-700">
-            {orders.map((order, index) => (
-              <tr key={order._id || index} className="border-b hover:bg-gray-100">
-                <td className="py-3 px-6">{order._id}</td>
+            {orders.map((order) => (
+              <tr key={order._id} className="border-b hover:bg-gray-100">
+                <td className="py-3 px-6">{order.orderId}</td>
                 <td className="py-3 px-6">{order.supplierId}</td>
                 <td className="py-3 px-6">{new Date(order.orderDate).toLocaleDateString()}</td>
-                <td className="py-3 px-6">
-                  <span className="bg-green-200 text-green-700 px-3 py-1 rounded-full text-sm">
-                    {order.orderStatus}
-                  </span>
-                </td>
+                <td className="py-3 px-6">{order.orderStatus}</td>
               </tr>
             ))}
           </tbody>
@@ -61,4 +45,4 @@ const PreviousSupplierOrders = () => {
   );
 };
 
-export default PreviousSupplierOrders;
+export default PreviousSupplierOrder;

@@ -8,7 +8,8 @@ const SupplierOrders = () => {
     expectedDeliveryDate: "",
     medicines: "",
     orderStatus: "Pending",
-    orderId: "", // Added to keep track of the order being edited
+    orderId: "",
+    actualDeliveryDate: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -39,9 +40,9 @@ const SupplierOrders = () => {
     const formattedMedicines = form.medicines
       ? form.medicines.split(",").map((med) => ({
           medicineId: med.trim(),
-          orderedQuantity: 1, // Default quantity
+          orderedQuantity: 1,
           receivedQuantity: 0,
-          totalAmount: 100, // Example price
+          totalAmount: 100,
         }))
       : [];
 
@@ -51,15 +52,14 @@ const SupplierOrders = () => {
       orderDate: new Date().toISOString(),
       medicines: formattedMedicines,
       orderStatus: form.orderStatus,
+      actualDeliveryDate: form.orderStatus === "Completed" ? new Date().toISOString() : null,
     };
 
     try {
       if (form.orderId) {
-        // Edit existing order
         await axios.put(`http://localhost:5001/api/supplierorders/${form.orderId}`, requestData);
-        setForm({ supplierId: "", expectedDeliveryDate: "", medicines: "", orderStatus: "Pending", orderId: "" });
+        setForm({ supplierId: "", expectedDeliveryDate: "", medicines: "", orderStatus: "Pending", orderId: "", actualDeliveryDate: "" });
       } else {
-        // Create new order
         await axios.post("http://localhost:5001/api/supplierorders", requestData);
       }
       fetchOrders();
@@ -83,20 +83,20 @@ const SupplierOrders = () => {
     setForm({
       supplierId: order.supplierId,
       expectedDeliveryDate: order.expectedDeliveryDate,
-      medicines: order.medicines.map((med) => med.medicineId).join(", "), // Assuming medicines is an array of objects with `medicineId`
+      medicines: order.medicines.map((med) => med.medicineId).join(", "),
       orderStatus: order.orderStatus,
-      orderId: order._id, // Set the orderId for updating the specific order
+      orderId: order._id,
+      actualDeliveryDate: order.actualDeliveryDate || "",
     });
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-5xl mx-auto"> {/* Increased the width of the container */}
       <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Supplier Orders</h1>
 
       {error && <p className="text-red-500 text-center">{error}</p>}
       {loading && <p className="text-center text-gray-500">Loading orders...</p>}
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
@@ -146,7 +146,6 @@ const SupplierOrders = () => {
         </button>
       </form>
 
-      {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
           <thead className="bg-blue-500 text-white">
@@ -154,6 +153,8 @@ const SupplierOrders = () => {
               <th className="py-3 px-6 text-left">Order ID</th>
               <th className="py-3 px-6 text-left">Supplier ID</th>
               <th className="py-3 px-6 text-left">Order Date</th>
+              <th className="py-3 px-6 text-left">Expected Delivery</th>
+              <th className="py-3 px-6 text-left">Actual Delivery</th>
               <th className="py-3 px-6 text-left">Status</th>
               <th className="py-3 px-6 text-left">Actions</th>
             </tr>
@@ -161,9 +162,15 @@ const SupplierOrders = () => {
           <tbody className="text-gray-700">
             {orders.map((order) => (
               <tr key={order._id} className="border-b hover:bg-gray-100">
-                <td className="py-3 px-6">{order._id}</td>
+                <td className="py-3 px-6">{order.orderId}</td>
                 <td className="py-3 px-6">{order.supplierId}</td>
                 <td className="py-3 px-6">{new Date(order.orderDate).toLocaleDateString()}</td>
+                <td className="py-3 px-6">{new Date(order.expectedDeliveryDate).toLocaleDateString()}</td>
+                <td className="py-3 px-6">
+                  {order.orderStatus === "Completed" ? (
+                    order.actualDeliveryDate ? new Date(order.actualDeliveryDate).toLocaleDateString() : "Not Available"
+                  ) : "-"}
+                </td>
                 <td className="py-3 px-6">
                   <span
                     className={`px-3 py-1 rounded-full text-sm ${
@@ -177,17 +184,11 @@ const SupplierOrders = () => {
                     {order.orderStatus}
                   </span>
                 </td>
-                <td className="py-3 px-6">
-                  <button
-                    onClick={() => handleEdit(order)}
-                    className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition duration-300 mr-2"
-                  >
+                <td className="py-3 px-6 flex space-x-2">
+                  <button onClick={() => handleEdit(order)} className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition duration-300">
                     Edit
                   </button>
-                  <button
-                    onClick={() => handleDelete(order._id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition duration-300"
-                  >
+                  <button onClick={() => handleDelete(order._id)} className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition duration-300">
                     Delete
                   </button>
                 </td>
