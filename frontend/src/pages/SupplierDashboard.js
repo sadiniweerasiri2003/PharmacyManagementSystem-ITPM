@@ -9,7 +9,6 @@ const SupplierDashboard = () => {
   const [activeTab, setActiveTab] = useState("suppliers"); // Default tab
   const navigate = useNavigate();
 
-  // Fetch suppliers and orders
   useEffect(() => {
     fetchSuppliers();
     fetchOngoingOrders();
@@ -44,89 +43,132 @@ const SupplierDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Main Content */}
-      <main className="p-10">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">Supplier Dashboard</h1>
-        <p className="text-gray-600 mb-6">Manage your orders and suppliers efficiently.</p>
-
-        {/* Tab Navigation */}
-        <div className="flex border-b-2 mb-6">
-          <button
-            className={`text-xl px-6 py-3 font-semibold transition duration-300 ${activeTab === "suppliers" ? "border-b-4 border-blue-600 text-blue-600" : "text-gray-500 hover:text-blue-500"}`}
-            onClick={() => setActiveTab("suppliers")}
-          >
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <aside className="w-64 bg-white p-5 shadow-lg">
+        <h2 className="text-xl font-bold mb-5">Admin Panel</h2>
+        <ul>
+          <li className={`py-2 px-4 rounded-lg cursor-pointer ${activeTab === "suppliers" ? "bg-blue-500 text-white" : "text-gray-700"}`} onClick={() => setActiveTab("suppliers")}>
             Suppliers
-          </button>
-          <button
-            className={`text-xl px-6 py-3 font-semibold transition duration-300 ${activeTab === "ongoingOrders" ? "border-b-4 border-blue-600 text-blue-600" : "text-gray-500 hover:text-blue-500"}`}
-            onClick={() => setActiveTab("ongoingOrders")}
-          >
+          </li>
+          <li className={`py-2 px-4 rounded-lg cursor-pointer ${activeTab === "ongoingOrders" ? "bg-blue-500 text-white" : "text-gray-700"}`} onClick={() => setActiveTab("ongoingOrders")}>
             Ongoing Orders
-          </button>
-          <button
-            className={`text-xl px-6 py-3 font-semibold transition duration-300 ${activeTab === "previousOrders" ? "border-b-4 border-blue-600 text-blue-600" : "text-gray-500 hover:text-blue-500"}`}
-            onClick={() => setActiveTab("previousOrders")}
-          >
+          </li>
+          <li className={`py-2 px-4 rounded-lg cursor-pointer ${activeTab === "previousOrders" ? "bg-blue-500 text-white" : "text-gray-700"}`} onClick={() => setActiveTab("previousOrders")}>
             Previous Orders
-          </button>
+          </li>
+        </ul>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 p-10">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">Supplier Dashboard</h1>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-3 gap-6 mb-6">
+          <div className="bg-white p-5 rounded-lg shadow">
+            <h3 className="text-lg font-semibold">Total Suppliers</h3>
+            <p className="text-3xl font-bold">{suppliers.length}</p>
+          </div>
+          <div className="bg-white p-5 rounded-lg shadow">
+            <h3 className="text-lg font-semibold">Ongoing Orders</h3>
+            <p className="text-3xl font-bold">{ongoingOrders.length}</p>
+          </div>
+          <div className="bg-white p-5 rounded-lg shadow">
+            <h3 className="text-lg font-semibold">Completed Orders</h3>
+            <p className="text-3xl font-bold">{previousOrders.length}</p>
+          </div>
         </div>
 
         {/* Tab Content */}
         {activeTab === "suppliers" && (
           <div>
             <h2 className="text-2xl font-semibold mb-4">Suppliers</h2>
-            {/* Add Supplier Button */}
             <button
               onClick={() => navigate("/orders")}
               className="bg-blue-500 text-white px-6 py-3 rounded-lg mb-4 hover:bg-blue-600 transition duration-300"
             >
               Create New Order
             </button>
-            <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {suppliers.map((supplier) => (
-                <li key={supplier._id} className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className="font-semibold text-xl">{supplier.name}</h3>
-                  <p className="text-gray-600">{supplier.email}</p>
-                  <p className="text-gray-600">{supplier.phone}</p>
-                  <button
-                    onClick={() => navigate(`/edit-supplier/${supplier._id}`)} // Navigate to Edit Supplier page
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4 hover:bg-blue-600 transition duration-300"
-                  >
-                    Edit Supplier
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <table className="w-full bg-white shadow-md rounded-lg">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="p-4">Name</th>
+                  <th className="p-4">Email</th>
+                  <th className="p-4">Phone</th>
+                  <th className="p-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {suppliers.map((supplier) => (
+                  <tr key={supplier._id} className="border-b">
+                    <td className="p-4">{supplier.name}</td>
+                    <td className="p-4">{supplier.email}</td>
+                    <td className="p-4">{supplier.phone}</td>
+                    <td className="p-4">
+                      <button
+                        onClick={() => navigate(`/edit-supplier/${supplier._id}`)}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
         {activeTab === "ongoingOrders" && (
           <div>
             <h2 className="text-2xl font-semibold mb-4">Ongoing Orders</h2>
-            {/* Ongoing Orders content */}
+            <table className="w-full bg-white shadow-md rounded-lg">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="p-4">Supplier</th>
+                  <th className="p-4">Order ID</th>
+                  <th className="p-4">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ongoingOrders.map((order) => (
+                  <tr key={order._id} className="border-b">
+                    <td className="p-4">{order.supplierName}</td>
+                    <td className="p-4">{order._id}</td>
+                    <td className="p-4">
+                      <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">Pending</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
         {activeTab === "previousOrders" && (
           <div>
             <h2 className="text-2xl font-semibold mb-4">Previous Orders</h2>
-            <button
-              onClick={() => navigate("/previous-supplier-orders")} // Navigate to Previous Supplier Orders page
-              className="bg-blue-500 text-white px-6 py-3 rounded-lg mb-4 hover:bg-blue-600 transition duration-300"
-            >
-              View Previous Orders
-            </button>
-            <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {previousOrders.map((order) => (
-                <li key={order._id} className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className="font-semibold text-xl">{order.supplierName}</h3>
-                  <p className="text-gray-600">Order ID: {order._id}</p>
-                  <p className="text-gray-600">Status: {order.status}</p>
-                  {/* Add more order details here */}
-                </li>
-              ))}
-            </ul>
+            <table className="w-full bg-white shadow-md rounded-lg">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="p-4">Supplier</th>
+                  <th className="p-4">Order ID</th>
+                  <th className="p-4">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {previousOrders.map((order) => (
+                  <tr key={order._id} className="border-b">
+                    <td className="p-4">{order.supplierName}</td>
+                    <td className="p-4">{order._id}</td>
+                    <td className="p-4">
+                      <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Completed</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </main>
