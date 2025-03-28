@@ -20,7 +20,7 @@ const SupplierOrders = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:5000/api/supplierorders");
+      const response = await axios.get("http://localhost:5001/api/supplierorders");
       setOrders(response.data);
     } catch (err) {
       setError("Error fetching orders.");
@@ -56,11 +56,11 @@ const SupplierOrders = () => {
     try {
       if (form.orderId) {
         // Edit existing order
-        await axios.put(`http://localhost:5000/api/supplierorders/${form.orderId}`, requestData);
+        await axios.put(`http://localhost:5001/api/supplierorders/${form.orderId}`, requestData);
         setForm({ supplierId: "", expectedDeliveryDate: "", medicines: "", orderStatus: "Pending", orderId: "" });
       } else {
         // Create new order
-        await axios.post("http://localhost:5000/api/supplierorders", requestData);
+        await axios.post("http://localhost:5001/api/supplierorders", requestData);
       }
       fetchOrders();
     } catch (err) {
@@ -71,7 +71,7 @@ const SupplierOrders = () => {
 
   const handleDelete = async (orderId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/supplierorders/${orderId}`);
+      await axios.delete(`http://localhost:5001/api/supplierorders/${orderId}`);
       fetchOrders();
     } catch (err) {
       setError("Error deleting order.");

@@ -13,7 +13,7 @@ const PreviousSupplierOrders = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:5000/api/supplierorders");
+      const response = await axios.get("http://localhost:5001/api/supplierorders");
       const completedOrders = response.data.filter(order => order.orderStatus === "Completed");
       setOrders(completedOrders);
     } catch (err) {

@@ -18,7 +18,7 @@ const SupplierDashboard = () => {
 
   const fetchSuppliers = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/suppliers");
+      const response = await axios.get("http://localhost:5001/api/suppliers");
       setSuppliers(response.data);
     } catch (err) {
       console.error("Error fetching suppliers", err);
@@ -27,7 +27,7 @@ const SupplierDashboard = () => {
 
   const fetchOngoingOrders = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/supplierorders?status=Pending");
+      const response = await axios.get("http://localhost:5001/api/supplierorders?status=Pending");
       setOngoingOrders(response.data);
     } catch (err) {
       console.error("Error fetching ongoing orders", err);
@@ -36,7 +36,7 @@ const SupplierDashboard = () => {
 
   const fetchPreviousOrders = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/supplierorders?status=Completed");
+      const response = await axios.get("http://localhost:5001/api/supplierorders?status=Completed");
       setPreviousOrders(response.data);
     } catch (err) {
       console.error("Error fetching previous orders", err);

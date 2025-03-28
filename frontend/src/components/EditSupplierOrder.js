@@ -59,7 +59,7 @@ const EditSupplierOrder = ({ orderId, onClose }) => {
     };
 
     try {
-      await axios.put(`http://localhost:5000/api/supplierorders/${orderId}`, requestData);
+      await axios.put(`http://localhost:5001/api/supplierorders/${orderId}`, requestData);
       onClose(); // Close the modal or the update form
     } catch (err) {
       setError("Error updating order.");
