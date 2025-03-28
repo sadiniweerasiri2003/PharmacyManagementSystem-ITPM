@@ -2,13 +2,13 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const connectDB = require("./config/db");
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
-const salesRoutes = require("./routes/salesRoutes");
+const salesRoutes = require("./routes/salesRoutes");  // Import the sales routes
 const medicineRoutes = require("./routes/medicineRoutes");
 
 const app = express();
+app.use(express.json());
 
 // Middleware
 app.use(cors());
@@ -26,7 +26,7 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use("/api/sales", salesRoutes);
+app.use("/api/sales", salesRoutes);  // Link the sales routes here
 app.use("/api/medicines", medicineRoutes);
 
 // Start the server
@@ -34,4 +34,3 @@ const port = process.env.PORT || 5001;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-
