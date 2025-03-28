@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Counter Schema for generating unique invoice IDs
 const CounterSchema = new mongoose.Schema({
     _id: { type: String, required: true },
     seq: { type: Number, default: 1 }
@@ -7,12 +8,16 @@ const CounterSchema = new mongoose.Schema({
 
 const Counter = mongoose.model("Counter", CounterSchema);
 
+// Sales Schema to handle multiple medicines per sale
 const SalesSchema = new mongoose.Schema({
     invoiceId: { type: String, unique: true },
-    medicineId: { type: String, required: true },
-    qty_sold: { type: Number, required: true },
-    unitprice: { type: Number, required: true },
-    totalprice: { type: Number, required: true },
+    medicines: [{
+        medicineId: { type: String, required: true },
+        name: { type: String, required: true }, // This is the field for storing the medicine name
+        qty_sold: { type: Number, required: true },
+        unitprice: { type: Number, required: true },
+        totalprice: { type: Number, required: true },
+    }],
     orderdate_time: { type: Date, default: Date.now },
     payment_type: { type: String, enum: ["Cash", "Credit"], required: true },
     cashier_id: { type: String, required: true }
@@ -27,7 +32,6 @@ SalesSchema.pre("save", async function (next) {
                 { $inc: { seq: 1 } },
                 { new: true, upsert: true }
             );
-
             this.invoiceId = `IN${String(counter.seq).padStart(5, "0")}`;
             next();
         } catch (error) {

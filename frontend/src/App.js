@@ -7,8 +7,8 @@ import Login from "./pages/login";
 import AdminDashboard from "./pages/AdminDashboard";
 import CashierDashboard from "./pages/CashierDashboard";
 import SupplierDashboard from "./pages/SupplierDashboard";
-import SalesDashboard from "./components/SalesDashboard";
-import BillingForm from "./components/BillingForm";
+import SalesDashboard from "./pages/SalesDashboard";
+import BillingForm from "./pages/BillingForm";
 import { Toaster } from "react-hot-toast";
 
 function App() {
