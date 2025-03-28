@@ -103,5 +103,24 @@ router.put("/update-medicines/:invoiceId", async (req, res) => {
     }
 });
 
+// Delete a sale by invoiceId
+router.delete("/:invoiceId", async (req, res) => {
+    try {
+        const { invoiceId } = req.params;
+        
+        // Find and delete the sale by invoiceId
+        const deletedSale = await Sales.findOneAndDelete({ invoiceId });
+
+        if (!deletedSale) {
+            return res.status(404).json({ message: "Sale not found" });
+        }
+
+        res.status(200).json({ message: "Sale deleted successfully", deletedSale });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error, could not delete sale" });
+    }
+});
+
 
 module.exports = router;
