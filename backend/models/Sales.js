@@ -1,13 +1,5 @@
 const mongoose = require("mongoose");
 
-// Counter Schema for generating unique invoice IDs
-const CounterSchema = new mongoose.Schema({
-    _id: { type: String, required: true },
-    seq: { type: Number, default: 1 }
-});
-
-const Counter = mongoose.model("Counter", CounterSchema);
-
 // Sales Schema to handle multiple medicines per sale
 const SalesSchema = new mongoose.Schema({
     invoiceId: { type: String, unique: true },
@@ -27,12 +19,16 @@ const SalesSchema = new mongoose.Schema({
 SalesSchema.pre("save", async function (next) {
     if (!this.invoiceId) {
         try {
-            let counter = await Counter.findByIdAndUpdate(
-                { _id: "invoiceId" },
-                { $inc: { seq: 1 } },
-                { new: true, upsert: true }
-            );
-            this.invoiceId = `IN${String(counter.seq).padStart(5, "0")}`;
+            // Find the last inserted invoiceId and extract the numeric part
+            const lastSale = await Sales.findOne().sort({ invoiceId: -1 }).exec();
+            let lastInvoiceId = lastSale ? lastSale.invoiceId : 'IN00000';
+
+            // Extract numeric part and increment by 1
+            let lastNumber = parseInt(lastInvoiceId.replace('IN', ''), 10);
+            let newInvoiceId = `IN${String(lastNumber + 1).padStart(5, '0')}`;
+
+            // Assign the new invoiceId
+            this.invoiceId = newInvoiceId;
             next();
         } catch (error) {
             next(error);
