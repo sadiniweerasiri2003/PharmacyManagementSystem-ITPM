@@ -40,12 +40,7 @@ const SalesDashboard = () => {
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg rounded-lg">
       <h2 className="text-2xl font-bold mb-6 text-center">Sales Records</h2>
 
-      {/* Create Bill Button */}
-      <div className="text-center mb-4">
-        <button onClick={() => navigate("/billing")} className="bg-blue-500 text-white py-2 px-6 rounded-lg shadow hover:bg-blue-600 transition duration-200">
-          Create a Bill
-        </button>
-      </div>
+  
 
       {/* Sales Table */}
       <div className="overflow-x-auto">
