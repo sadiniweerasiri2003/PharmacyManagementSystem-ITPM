@@ -17,7 +17,7 @@ const BillingForm = () => {
   // Fetch sales records from backend
   const fetchSalesRecords = async () => {
     try {
-      const response = await fetch("http://localhost:5001/api/sales");
+      const response = await fetch("http://localhost:5001/api/sales/today");
       if (response.ok) {
         const sales = await response.json();
         setSalesRecords(sales);

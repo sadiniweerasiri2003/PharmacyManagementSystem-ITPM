@@ -8,7 +8,7 @@ const SalesDashboard = () => {
   useEffect(() => {
     const fetchSales = async () => {
       try {
-        const response = await fetch("http://localhost:5001/api/sales");
+        const response = await fetch("http://localhost:5001/api/sales/today");
         const data = await response.json();
         setSales(data);
       } catch (error) {
@@ -17,8 +17,7 @@ const SalesDashboard = () => {
     };
     
     fetchSales();
-  }, [sales]); // 👈 Adding `sales` as a dependency ensures re-fetching when a sale is added
-
+  }, []);
   // Delete Sale
   const handleDelete = async (orderid) => {
     if (window.confirm("Are you sure you want to delete this sale?")) {

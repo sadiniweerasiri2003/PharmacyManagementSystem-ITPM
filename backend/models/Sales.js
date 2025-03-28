@@ -8,8 +8,8 @@ const CounterSchema = new mongoose.Schema({
 const Counter = mongoose.model("Counter", CounterSchema);
 
 const SalesSchema = new mongoose.Schema({
-    invoiceId: { type: String, unique: true }, // Auto-generated invoice ID
-    medicineId: { type: String, required: true, default: "M001" },
+    invoiceId: { type: String, unique: true },
+    medicineId: { type: String, required: true },
     qty_sold: { type: Number, required: true },
     unitprice: { type: Number, required: true },
     totalprice: { type: Number, required: true },
@@ -18,17 +18,17 @@ const SalesSchema = new mongoose.Schema({
     cashier_id: { type: String, required: true }
 });
 
-// Pre-save middleware to generate invoiceId
+// Pre-save middleware to generate invoiceId correctly
 SalesSchema.pre("save", async function (next) {
     if (!this.invoiceId) {
         try {
-            const counter = await Counter.findByIdAndUpdate(
+            let counter = await Counter.findByIdAndUpdate(
                 { _id: "invoiceId" },
                 { $inc: { seq: 1 } },
                 { new: true, upsert: true }
             );
 
-            this.invoiceId = `IN${String(counter.seq).padStart(3, "0")}`;
+            this.invoiceId = `IN${String(counter.seq).padStart(5, "0")}`;
             next();
         } catch (error) {
             next(error);
@@ -38,4 +38,6 @@ SalesSchema.pre("save", async function (next) {
     }
 });
 
-module.exports = mongoose.model("Sales", SalesSchema);
+const Sales = mongoose.model("Sales", SalesSchema);
+
+module.exports = Sales;
