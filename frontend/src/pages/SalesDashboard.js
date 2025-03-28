@@ -19,22 +19,27 @@ const SalesDashboard = () => {
     fetchSales();
   }, []);
 
-  // Delete Sale
   const handleDelete = async (invoiceId) => {
     if (window.confirm("Are you sure you want to delete this sale?")) {
       try {
-        const response = await fetch(`http://localhost:5001/api/sales/${invoiceId}`, { method: "DELETE" });
-
+        const response = await fetch(`http://localhost:5001/api/sales/${invoiceId}`, {
+          method: "DELETE",
+        });
+  
         if (response.ok) {
-          setSales(sales.filter((sale) => sale.invoiceId !== invoiceId));
+          // Remove the deleted sale from the state
+          setSales((prevSales) => prevSales.filter((sale) => sale.invoiceId !== invoiceId));
         } else {
-          alert("Failed to delete sale.");
+          const errorData = await response.json();
+          alert(`Failed to delete sale: ${errorData.message}`);
         }
       } catch (error) {
         console.error("Error:", error);
+        alert("Error deleting sale. Please try again.");
       }
     }
   };
+  
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg rounded-lg">
