@@ -19,6 +19,9 @@ function App() {
           <Route path="/cashier-dashboard" element={<CashierDashboard />} />
           <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
           <Route path="/orders" element={<SupplierOrder />} />
+          <Route path="/inventory-dashboard" element={<InventoryDashboard />} />
+          <Route path="/add-item" element={<AddMedicines />} />
+          <Route path="/update-medicine/:id" element={<UpdateMedicine />} />
         </Routes>
       </div>
     </Router>
