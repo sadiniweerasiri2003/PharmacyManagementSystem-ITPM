@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const SupplierOrder = ({ fetchOrders }) => {
   const navigate = useNavigate();
+  const [orders, setOrders] = useState([]); // Added state for orders
   const [form, setForm] = useState({
     supplierId: "",
     expectedDeliveryDate: "",
@@ -14,10 +15,10 @@ const SupplierOrder = ({ fetchOrders }) => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders(); // Calling the passed-down function
+  }, [fetchOrders]); // Added dependency array
 
-  const fetchOrders = async () => {
+  const fetchSupplierOrders = async () => { // Renamed function
     setLoading(true);
     try {
       const response = await axios.get("http://localhost:5001/api/supplierorders");
@@ -29,14 +30,13 @@ const SupplierOrder = ({ fetchOrders }) => {
     setLoading(false);
   };
 
-  
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Start loading state
 
     const formattedMedicines = form.medicines
       ? form.medicines.split(",").map((med) => ({
@@ -59,12 +59,12 @@ const SupplierOrder = ({ fetchOrders }) => {
     try {
       await axios.post("http://localhost:5001/api/supplierorders", requestData);
       setForm({ supplierId: "", expectedDeliveryDate: "", medicines: "", orderStatus: "Pending" });
-      fetchOrders();
+      fetchOrders(); // Call the function passed as a prop
     } catch (err) {
       setError("Error saving order.");
       console.error("API Error:", err.response ? err.response.data : err.message);
     }
-    setLoading(false);
+    setLoading(false); // Stop loading state
   };
 
   return (
@@ -72,7 +72,7 @@ const SupplierOrder = ({ fetchOrders }) => {
       <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Create Supplier Order</h1>
 
       {error && <p className="text-red-500 text-center">{error}</p>}
-      {loading && <p className="text-center text-gray-500">Saving order...</p>}
+      {loading && <p className="text-center text-gray-500">Processing...</p>}
 
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -118,8 +118,9 @@ const SupplierOrder = ({ fetchOrders }) => {
         <button
           type="submit"
           className="mt-4 w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
+          disabled={loading}
         >
-          Create Order
+          {loading ? "Processing..." : "Create Order"}
         </button>
       </form>
     </div>
