@@ -22,9 +22,9 @@ const Login = () => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
 
-      if (data.role === "admin") navigate("./admin-dashboard");
-      else if (data.role === "cashier") navigate("./cashier-dashboard");
-      else if (data.role === "supplier") navigate("./supplier-dashboard");
+      if (data.role === "admin") navigate("/dashboard");
+      else if (data.role === "cashier") navigate("/cashier-dashboard");
+      else if (data.role === "supplier") navigate("/supplier-dashboard");
     } else {
       alert("Invalid credentials");
     }
