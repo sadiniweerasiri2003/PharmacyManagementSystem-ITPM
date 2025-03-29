@@ -4,7 +4,10 @@ import InventoryDashboard from "./pages/InventoryDashboard";
 import AddMedicines from "./pages/AddMedicines";
 import UpdateMedicine from "./pages/UpdateMedicine";
 import Login from "./pages/login";
-import SupplierOrder from "./components/SupplierOrder";
+import SupplierOrder from "./components/SupplierOrder";  // New form for creating and editing orders
+import SupplierOrderList from "./components/SupplierOrderList"; // New list for viewing orders
+import PreviousSupplierOrders from "./components/PreviousSupplierOrders";
+import EditSupplierOrder from "./components/EditSupplierOrder";  // For handling order edits directly
 import AdminDashboard from "./pages/AdminDashboard";
 import CashierDashboard from "./pages/CashierDashboard";
 import SupplierDashboard from "./pages/SupplierDashboard";
@@ -18,7 +21,16 @@ function App() {
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/cashier-dashboard" element={<CashierDashboard />} />
           <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
-          <Route path="/orders" element={<SupplierOrder />} />
+          
+          {/* Routes for Supplier Orders */}
+          <Route path="/orders" element={<SupplierOrderList />} /> {/* View all orders */}
+          <Route path="/orders/add" element={<SupplierOrder fetchOrders={() => {}} />} /> {/* Add a new order */}
+          <Route path="/orders/edit/:id" element={<EditSupplierOrder fetchOrders={() => {}} />} /> {/* Edit an existing order */}
+        
+          
+          {/* Other routes */}
+          <Route path="/previous-supplier-orders" element={<PreviousSupplierOrders />} />
+          <Route path="/edit-supplier/:id" element={<EditSupplierOrder />} />
           <Route path="/inventory-dashboard" element={<InventoryDashboard />} />
           <Route path="/add-item" element={<AddMedicines />} />
           <Route path="/update-medicine/:id" element={<UpdateMedicine />} />

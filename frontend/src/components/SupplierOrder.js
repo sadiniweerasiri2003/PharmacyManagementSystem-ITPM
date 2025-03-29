@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-const SupplierOrders = () => {
-  const [orders, setOrders] = useState([]);
+const SupplierOrder = ({ fetchOrders }) => {
+  const navigate = useNavigate();
+  const [orders, setOrders] = useState([]); // Added state for orders
   const [form, setForm] = useState({
     supplierId: "",
     expectedDeliveryDate: "",
@@ -13,10 +15,10 @@ const SupplierOrders = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders(); // Calling the passed-down function
+  }, [fetchOrders]); // Added dependency array
 
-  const fetchOrders = async () => {
+  const fetchSupplierOrders = async () => { // Renamed function
     setLoading(true);
     try {
       const response = await axios.get("http://localhost:5001/api/supplierorders");
@@ -28,132 +30,101 @@ const SupplierOrders = () => {
     setLoading(false);
   };
 
-  
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    // Convert medicines input to proper format
+    setLoading(true); // Start loading state
+
     const formattedMedicines = form.medicines
       ? form.medicines.split(",").map((med) => ({
           medicineId: med.trim(),
-          orderedQuantity: 1, // Default quantity (Change if required)
+          orderedQuantity: 1,
           receivedQuantity: 0,
-          totalAmount: 100 // Set an example price (Adjust as needed)
+          totalAmount: 100,
         }))
       : [];
-  
+
     const requestData = {
       supplierId: form.supplierId,
       expectedDeliveryDate: form.expectedDeliveryDate,
       orderDate: new Date().toISOString(),
       medicines: formattedMedicines,
       orderStatus: form.orderStatus,
+      actualDeliveryDate: form.orderStatus === "Completed" ? new Date().toISOString() : null,
     };
-  
+
     try {
       await axios.post("http://localhost:5001/api/supplierorders", requestData);
       setForm({ supplierId: "", expectedDeliveryDate: "", medicines: "", orderStatus: "Pending" });
-      fetchOrders();
+      fetchOrders(); // Call the function passed as a prop
     } catch (err) {
-      setError("Error adding order. Check console for details.");
+      setError("Error saving order.");
       console.error("API Error:", err.response ? err.response.data : err.message);
     }
-  };
-  
-
-  const handleDelete = async (orderId) => {
-    try {
-      await axios.delete(`http://localhost:5001/api/supplierorders/${orderId}`);
-      fetchOrders();
-    } catch (err) {
-      setError("Error deleting order.");
-      console.error(err);
-    }
+    setLoading(false); // Stop loading state
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Supplier Orders</h1>
+    <div className="p-6 max-w-5xl mx-auto">
+      <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Create Supplier Order</h1>
 
-      {error && <p className="text-red-500">{error}</p>}
-      {loading && <p>Loading orders...</p>}
+      {error && <p className="text-red-500 text-center">{error}</p>}
+      {loading && <p className="text-center text-gray-500">Processing...</p>}
 
-      <form onSubmit={handleSubmit} className="mb-4 p-4 border rounded">
-        <input
-          type="text"
-          name="supplierId"
-          placeholder="Supplier ID"
-          value={form.supplierId}
-          onChange={handleChange}
-          className="border p-2 mr-2"
-          required
-        />
-        <input
-          type="date"
-          name="expectedDeliveryDate"
-          value={form.expectedDeliveryDate}
-          onChange={handleChange}
-          className="border p-2 mr-2"
-          required
-        />
+      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input
+            type="text"
+            name="supplierId"
+            placeholder="Supplier ID"
+            value={form.supplierId}
+            onChange={handleChange}
+            className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          <input
+            type="date"
+            name="expectedDeliveryDate"
+            value={form.expectedDeliveryDate}
+            onChange={handleChange}
+            className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
         <input
           type="text"
           name="medicines"
           placeholder="Medicines (comma separated)"
           value={form.medicines}
           onChange={handleChange}
-          className="border p-2 mr-2"
+          className="border border-gray-300 p-3 rounded-lg w-full mt-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+
         <select
           name="orderStatus"
           value={form.orderStatus}
           onChange={handleChange}
-          className="border p-2 mr-2"
+          className="border border-gray-300 p-3 rounded-lg w-full mt-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="Pending">Pending</option>
-          
           <option value="Cancelled">Cancelled</option>
           <option value="Completed">Completed</option>
         </select>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2">
-          Add Order
+
+        <button
+          type="submit"
+          className="mt-4 w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
+          disabled={loading}
+        >
+          {loading ? "Processing..." : "Create Order"}
         </button>
       </form>
-
-      <table className="w-full border-collapse border">
-        <thead>
-          <tr>
-            <th className="border p-2">Order ID</th>
-            <th className="border p-2">Supplier ID</th>
-            <th className="border p-2">Order Date</th>
-            <th className="border p-2">Status</th>
-            <th className="border p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-        {orders.map((order, index) => (
-          <tr key={order._id || index}>
-              <td className="border p-2">{order._id}</td>
-              <td className="border p-2">{order.supplierId}</td>
-              <td className="border p-2">{new Date(order.orderDate).toLocaleDateString()}</td>
-              <td className="border p-2">{order.orderStatus}</td>
-              <td className="border p-2">
-                <button onClick={() => handleDelete(order._id)} className="bg-red-500 text-white px-2 py-1">
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 };
 
-export default SupplierOrders;
+export default SupplierOrder;
