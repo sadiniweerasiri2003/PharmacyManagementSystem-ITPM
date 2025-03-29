@@ -5,7 +5,7 @@ const cors = require('cors');
 const connectDB = require("./config/db");
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
-const supplierRoutes = require("./routes/supplierRoutes");
+const supplierRoutes = require("./routes/supplierRoutes.js");
 const supplierOrderRoutes = require("./routes/supplierOrderRoutes");
 const medicineRoutes = require("./routes/medicineRoutes");
 

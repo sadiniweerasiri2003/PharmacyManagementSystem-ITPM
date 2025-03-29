@@ -6,9 +6,11 @@ const UpdateMedicine = () => {
   const navigate = useNavigate();
   const [medicine, setMedicine] = useState(null);
   const [message, setMessage] = useState("");
+  const [suppliers, setSuppliers] = useState([]); // Add suppliers state
 
   useEffect(() => {
     fetchMedicine();
+    fetchSuppliers(); // Add this function call
   }, []);
 
   const fetchMedicine = async () => {
@@ -26,6 +28,21 @@ const UpdateMedicine = () => {
       }
     } catch (error) {
       setMessage("Error fetching data.");
+    }
+  };
+
+  // Add this function to fetch suppliers
+  const fetchSuppliers = async () => {
+    try {
+      const response = await fetch("http://localhost:5001/api/suppliers");
+      if (response.ok) {
+        const data = await response.json();
+        setSuppliers(data);
+      } else {
+        setMessage("Failed to fetch suppliers.");
+      }
+    } catch (error) {
+      setMessage("Error fetching suppliers.");
     }
   };
 
@@ -51,7 +68,7 @@ const UpdateMedicine = () => {
         setMessage("✅ Medicine updated successfully!");
         // Add navigation after successful update
         setTimeout(() => {
-          navigate('/dashboard'); // Update this to match your dashboard route
+          navigate('/inventory-dashboard'); // Update this to match your dashboard route
         }, 1500);
       } else {
         setMessage("❌ Failed to update medicine.");
@@ -142,16 +159,23 @@ const UpdateMedicine = () => {
               />
             </div>
 
+            {/* Replace the supplier ID input with dropdown */}
             <div>
-              <label className="block text-gray-700 font-medium mb-1">Supplier ID:</label>
-              <input
-                type="text"
+              <label className="block text-gray-700 font-medium mb-1">Supplier</label>
+              <select
                 name="supplierId"
                 value={medicine.supplierId || ""}
-                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 onChange={handleChange}
+                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
-              />
+              >
+                <option value="">Select a Supplier</option>
+                {suppliers.map((supplier) => (
+                  <option key={supplier.supplierId} value={supplier.supplierId}>
+                    {supplier.name} ({supplier.supplierId})
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="col-span-2 text-center">

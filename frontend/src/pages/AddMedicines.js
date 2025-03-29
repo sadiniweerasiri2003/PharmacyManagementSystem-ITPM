@@ -16,6 +16,7 @@ const AddMedicines = () => {
 
   const [message, setMessage] = useState(null);
   const [errors, setErrors] = useState({});
+  const [suppliers, setSuppliers] = useState([]); // Add this state for suppliers
 
   // Generate Medicine ID
   const generateMedicineId = async () => {
@@ -56,7 +57,23 @@ const AddMedicines = () => {
       }));
     };
     initializeForm();
+    fetchSuppliers(); // Add this function call
   }, []);
+
+  // Add this function to fetch suppliers
+  const fetchSuppliers = async () => {
+    try {
+      const response = await fetch("http://localhost:5001/api/suppliers");
+      if (response.ok) {
+        const data = await response.json();
+        setSuppliers(data);
+      } else {
+        setMessage({ type: 'error', text: "Failed to fetch suppliers." });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: "Error fetching suppliers." });
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -76,7 +93,7 @@ const AddMedicines = () => {
 
       if (response.ok) {
         setMessage({ type: 'success', text: "✅ Medicine added successfully!" });
-        setTimeout(() => navigate("/dashboard"), 1500);
+        setTimeout(() => navigate("/inventory-dashboard"), 1500);
       } else {
         // Handle specific error for duplicate medicine name
         if (data.field === 'name') {
@@ -189,15 +206,21 @@ const AddMedicines = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-1">Supplier ID</label>
-            <input
-              type="text"
+            <label className="block text-sm font-semibold mb-1">Supplier</label>
+            <select
               name="supplierId"
               value={formData.supplierId}
               onChange={handleChange}
               className="p-2 border rounded w-full"
               required
-            />
+            >
+              <option value="">Select a Supplier</option>
+              {suppliers.map((supplier) => (
+                <option key={supplier.supplierId} value={supplier.supplierId}>
+                  {supplier.name} ({supplier.supplierId})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="md:col-span-2">
