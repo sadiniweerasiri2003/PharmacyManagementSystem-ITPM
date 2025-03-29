@@ -39,7 +39,7 @@ def calculate_daily_sales_avg(medicine_id):
     # Extract sales quantity and order dates
     total_sales = sum(sale['medicines'][0]['qty_sold'] for sale in sales_data)
 
-    # Ensure orderdate_time is correctly parsed
+    # Ensure o1 orderdate_time is correctly parsed
     dates = [sale['orderdate_time'] if isinstance(sale['orderdate_time'], datetime)
              else datetime.fromisoformat(sale['orderdate_time']) for sale in sales_data]
 
