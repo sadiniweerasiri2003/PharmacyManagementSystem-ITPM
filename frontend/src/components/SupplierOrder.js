@@ -13,6 +13,24 @@ const SupplierOrder = ({ fetchOrders }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("http://localhost:5001/api/supplierorders");
+      setOrders(response.data);
+    } catch (err) {
+      setError("Error fetching orders.");
+      console.error(err);
+    }
+    setLoading(false);
+  };
+
+  
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -39,10 +57,9 @@ const SupplierOrder = ({ fetchOrders }) => {
     };
 
     try {
-      setLoading(true);
       await axios.post("http://localhost:5001/api/supplierorders", requestData);
-      navigate("/orders");
-      if (fetchOrders) fetchOrders();
+      setForm({ supplierId: "", expectedDeliveryDate: "", medicines: "", orderStatus: "Pending" });
+      fetchOrders();
     } catch (err) {
       setError("Error saving order.");
       console.error("API Error:", err.response ? err.response.data : err.message);
