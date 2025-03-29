@@ -12,7 +12,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route 
-            path="/login/dashboard" 
+            path="/dashboard" 
             element={
               <DashboardLayout>
                 <AdminDashboard />
