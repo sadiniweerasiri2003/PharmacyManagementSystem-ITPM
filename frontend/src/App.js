@@ -8,6 +8,7 @@ import EditSupplierOrder from "./components/EditSupplierOrder";  // For handling
 import AdminDashboard from "./pages/AdminDashboard";
 import CashierDashboard from "./pages/CashierDashboard";
 import SupplierDashboard from "./pages/SupplierDashboard";
+import SupplierManagement from "./components/SupplierManagement";
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/cashier-dashboard" element={<CashierDashboard />} />
           <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
+          <Route path="/supplier" element={<SupplierManagement />} />
+          
           
           {/* Routes for Supplier Orders */}
           <Route path="/orders" element={<SupplierOrderList />} /> {/* View all orders */}

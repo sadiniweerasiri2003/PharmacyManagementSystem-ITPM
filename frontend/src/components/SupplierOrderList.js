@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FaEdit, FaTrash } from "react-icons/fa"; // Make sure react-icons is imported
 
 const SupplierOrderList = () => {
   const [orders, setOrders] = useState([]);
@@ -55,26 +56,29 @@ const SupplierOrderList = () => {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Supplier Orders</h1>
+    <div className="p-6 max-w-7xl mx-auto bg-white shadow-xl rounded-lg">
+      <h1 className="text-4xl font-extrabold text-center mb-6 text-blue-800">Supplier Orders</h1>
 
       {error && <p className="text-red-500 text-center">{error}</p>}
       {loading && <p className="text-center text-gray-500">Loading orders...</p>}
 
       {/* Search Input */}
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between relative">
         <input
           type="text"
           placeholder="Search by Order ID, Supplier ID, or Status"
-          className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+        <span className="absolute right-4 top-3 text-gray-500 text-sm">
+          {filteredOrders.length} out of {orders.length} {/* Display as x out of y */}
+        </span>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-          <thead className="bg-blue-500 text-white">
+      <div className="overflow-x-auto bg-gray-50 p-4 rounded-lg shadow-md">
+        <table className="min-w-full bg-white rounded-lg overflow-hidden">
+          <thead className="bg-gradient-to-r from-blue-500 to-teal-500 text-white">
             <tr>
               <th className="py-3 px-6 text-left">Order ID</th>
               <th className="py-3 px-6 text-left">Supplier ID</th>
@@ -99,10 +103,9 @@ const SupplierOrderList = () => {
                 </td>
                 <td className="py-3 px-6">
                   <span
-                    className={`px-3 py-1 rounded-full text-sm ${
-                      order.orderStatus === "Pending"
-                        ? "bg-yellow-200 text-yellow-700"
-                        : order.orderStatus === "Completed"
+                    className={`px-3 py-1 rounded-full text-sm ${order.orderStatus === "Pending"
+                      ? "bg-yellow-200 text-yellow-700"
+                      : order.orderStatus === "Completed"
                         ? "bg-green-200 text-green-700"
                         : "bg-red-200 text-red-700"
                     }`}
@@ -110,18 +113,18 @@ const SupplierOrderList = () => {
                     {order.orderStatus}
                   </span>
                 </td>
-                <td className="py-3 px-6 flex space-x-2">
+                <td className="py-3 px-6 flex space-x-4">
                   <button
                     onClick={() => navigate(`/orders/edit/${order.orderId}`)}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition duration-300"
+                    className="text-yellow-500 hover:text-yellow-700 transition duration-300"
                   >
-                    Edit
+                    <FaEdit size={20} />
                   </button>
                   <button
                     onClick={() => handleDelete(order.orderId)}
-                    className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition duration-300"
+                    className="text-red-500 hover:text-red-700 transition duration-300"
                   >
-                    Delete
+                    <FaTrash size={20} />
                   </button>
                 </td>
               </tr>

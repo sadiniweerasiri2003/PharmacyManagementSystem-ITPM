@@ -102,12 +102,7 @@ const SupplierDashboard = () => {
         {activeTab === "suppliers" && (
           <div>
             <h2 className="text-2xl font-semibold mb-4">Suppliers</h2>
-            <button
-              onClick={() => navigate("/orders")}
-              className="bg-blue-500 text-white px-6 py-3 rounded-lg mb-4 hover:bg-blue-600 transition duration-300"
-            >
-              All Orders
-            </button>
+            
 
            
             <table className="w-full bg-white shadow-md rounded-lg">

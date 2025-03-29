@@ -27,4 +27,5 @@ supplierSchema.pre("save", async function (next) {
   next();
 });
 
-module.exports = mongoose.model("Supplier", supplierSchema);
+const Supplier = mongoose.model("Supplier", supplierSchema);
+module.exports = Supplier;
