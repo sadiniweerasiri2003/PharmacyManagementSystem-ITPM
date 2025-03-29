@@ -55,7 +55,6 @@ router.get("/today", async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 });
-// Update multiple medicines in a sale
 router.put("/update-medicines/:invoiceId", async (req, res) => {
     try {
         const { invoiceId } = req.params;
@@ -70,7 +69,13 @@ router.put("/update-medicines/:invoiceId", async (req, res) => {
 
         // Loop through each updated medicine and update it in the sale
         for (const updatedMedicine of updatedMedicines) {
-            const { medicineId, newName, newQty } = updatedMedicine;
+            let { medicineId, newName, newQty } = updatedMedicine;
+
+            // Ensure newQty is a valid number
+            newQty = Number(newQty);
+            if (isNaN(newQty) || newQty <= 0) {
+                return res.status(400).json({ message: `Invalid quantity for medicine ${newName}` });
+            }
 
             // Find the specific medicine entry within the sale
             const medicineIndex = sale.medicines.findIndex(med => med.medicineId === medicineId);
@@ -90,6 +95,7 @@ router.put("/update-medicines/:invoiceId", async (req, res) => {
             sale.medicines[medicineIndex].medicineId = medicineDetails.medicineId;  // Update medicineId
             sale.medicines[medicineIndex].name = newName;  // Update medicine name
             sale.medicines[medicineIndex].unitprice = medicineDetails.price;  // Update unit price
+            sale.medicines[medicineIndex].qty_sold = newQty;  // Update quantity sold
             sale.medicines[medicineIndex].totalprice = newQty * medicineDetails.price;  // Recalculate total price
         }
 
@@ -102,6 +108,7 @@ router.put("/update-medicines/:invoiceId", async (req, res) => {
         res.status(500).json({ message: "Server error, could not update medicines" });
     }
 });
+
 
 // Delete a sale by invoiceId
 router.delete("/:invoiceId", async (req, res) => {
