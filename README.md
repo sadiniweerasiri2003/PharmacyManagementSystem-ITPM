@@ -1,0 +1,5 @@
+The Pharmacy Management System is a comprehensive software application designed to automate and streamline the day-to-day operations of a pharmacy. This system facilitates efficient management of medicine inventory, sales, purchases, customer records, billing, and prescriptions. It helps pharmacists track stock levels, monitor expiration dates, and maintain accurate records of transactions while ensuring compliance with healthcare regulations.
+
+The system supports secure login for different roles (admin, pharmacist, cashier), enabling proper access control and data security. Customers’ prescription details can be stored digitally, and the system automatically checks for medicine availability. Real-time inventory updates reduce the risk of stockouts or overstocking, and automated alerts notify staff about low stock and nearing expiry dates.
+
+By replacing traditional manual processes with digital workflows, the Pharmacy Management System enhances operational efficiency, reduces human error, and improves customer satisfaction. It is built using modern technologies and is scalable for small, medium, or large pharmacy setups.
