@@ -1,14 +1,16 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/login";
-import SupplierOrder from "./components/SupplierOrder";  // New form for creating and editing orders
-import SupplierOrderList from "./components/SupplierOrderList"; // New list for viewing orders
+import SupplierOrder from "./components/SupplierOrder";
+import SupplierOrderList from "./components/SupplierOrderList";
 import PreviousSupplierOrders from "./components/PreviousSupplierOrders";
-import EditSupplierOrder from "./components/EditSupplierOrder";  // For handling order edits directly
+import EditSupplierOrder from "./components/EditSupplierOrder";
 import AdminDashboard from "./pages/AdminDashboard";
 import CashierDashboard from "./pages/CashierDashboard";
 import SupplierDashboard from "./pages/SupplierDashboard";
-import SupplierManagement from "./components/SupplierManagement";
+import AddSupplier from "./components/AddSupplier";
+import SupplierList from "./components/SupplierList";
+import EditSupplier from "./components/EditSupplier";
 
 function App() {
   return (
@@ -19,18 +21,22 @@ function App() {
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/cashier-dashboard" element={<CashierDashboard />} />
           <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
-          <Route path="/supplier" element={<SupplierManagement />} />
           
+          {/* Supplier Management Routes */}
+          <Route path="/suppliers" element={<SupplierList />} />
+          <Route path="/suppliers/add" element={<AddSupplier />} />
+          <Route path="/suppliers/edit/:id" element={<EditSupplier />} />
           
-          {/* Routes for Supplier Orders */}
-          <Route path="/orders" element={<SupplierOrderList />} /> {/* View all orders */}
-          <Route path="/orders/add" element={<SupplierOrder fetchOrders={() => {}} />} /> {/* Add a new order */}
-          <Route path="/orders/edit/:id" element={<EditSupplierOrder fetchOrders={() => {}} />} /> {/* Edit an existing order */}
-        
+          {/* Order Management Routes */}
+          <Route path="/orders" element={<SupplierOrderList />} />
+          <Route path="/orders/add" element={<SupplierOrder />} />
+          <Route path="/orders/edit/:id" element={<EditSupplierOrder />} />
           
           {/* Other routes */}
           <Route path="/previous-supplier-orders" element={<PreviousSupplierOrders />} />
-          <Route path="/edit-supplier/:id" element={<EditSupplierOrder />} />
+          
+          {/* Default route */}
+          <Route path="/" element={<Login />} />
         </Routes>
       </div>
     </Router>

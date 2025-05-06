@@ -1,10 +1,9 @@
-
-
-/*import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const SupplierManagement = () => {
-  const [suppliers, setSuppliers] = useState([]);
+const AddSupplier = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
     phoneNumber: "",
@@ -15,19 +14,6 @@ const SupplierManagement = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    fetchSuppliers();
-  }, []);
-
-  const fetchSuppliers = async () => {
-    try {
-      const response = await axios.get("http://localhost:5001/api/suppliers");
-      setSuppliers(response.data);
-    } catch (err) {
-      console.error("Error fetching suppliers:", err.message);
-    }
-  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -43,7 +29,7 @@ const SupplierManagement = () => {
       await axios.post("http://localhost:5001/api/suppliers", form);
       setForm({ name: "", phoneNumber: "", email: "", address: "", leadTimeDays: 0 });
       setSuccess("Supplier added successfully!");
-      fetchSuppliers();
+      setTimeout(() => navigate("/suppliers"), 1500);
     } catch (err) {
       setError("Error saving supplier. Please try again.");
       console.error("API Error:", err.message);
@@ -51,27 +37,22 @@ const SupplierManagement = () => {
     setLoading(false);
   };
 
-  const handleDelete = async (supplierId) => {
-    if (!window.confirm("Are you sure you want to delete this supplier?")) return;
-
-    try {
-      await axios.delete(`http://localhost:5001/api/suppliers/${supplierId}`);
-      setSuccess("Supplier deleted successfully!");
-      fetchSuppliers();
-    } catch (err) {
-      setError("Error deleting supplier.");
-      console.error("Error:", err.message);
-    }
-  };
-
   return (
     <div className="p-8 max-w-4xl mx-auto bg-white shadow-xl rounded-lg border border-gray-200">
-      <h1 className="text-3xl font-semibold text-center text-gray-800 mb-6">Supplier Management</h1>
+      <h1 className="text-3xl font-semibold text-center text-gray-800 mb-6">Add New Supplier</h1>
+      
+      <div className="flex justify-end mb-4">
+        <button 
+          onClick={() => navigate("/suppliers")}
+          className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition"
+        >
+          View Suppliers
+        </button>
+      </div>
 
       {error && <p className="text-red-600 text-center font-medium mb-4">{error}</p>}
       {success && <p className="text-green-600 text-center font-medium mb-4">{success}</p>}
 
-      
       <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4 mb-6">
         <input
           type="text"
@@ -126,45 +107,8 @@ const SupplierManagement = () => {
           {loading ? "Processing..." : "Add Supplier"}
         </button>
       </form>
-
-      
-      {suppliers.length > 0 ? (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 px-4 py-2">Supplier ID</th>
-                <th className="border border-gray-300 px-4 py-2">Name</th>
-                <th className="border border-gray-300 px-4 py-2">Email</th>
-                <th className="border border-gray-300 px-4 py-2">Phone</th>
-                <th className="border border-gray-300 px-4 py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {suppliers.map((supplier) => (
-                <tr key={supplier.supplierId} className="hover:bg-gray-50">
-                  <td className="border border-gray-300 px-4 py-2 text-center">{supplier.supplierId}</td>
-                  <td className="border border-gray-300 px-4 py-2">{supplier.name}</td>
-                  <td className="border border-gray-300 px-4 py-2">{supplier.email}</td>
-                  <td className="border border-gray-300 px-4 py-2">{supplier.phoneNumber}</td>
-                  <td className="border border-gray-300 px-4 py-2 text-center">
-                    <button
-                      onClick={() => handleDelete(supplier.supplierId)}
-                      className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700 transition duration-300"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p className="text-gray-500 text-center">No suppliers found.</p>
-      )}
     </div>
   );
 };
 
-export default SupplierManagement;*/
+export default AddSupplier;
