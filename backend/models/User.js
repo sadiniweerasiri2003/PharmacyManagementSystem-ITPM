@@ -30,28 +30,29 @@ userSchema.statics.generateCashierId = async function () {
   return newCashierId;
 };
 
-// Pre-save hook to auto-generate the cashier ID for cashiers
+// Pre-save hook to hash password and generate cashier ID
 userSchema.pre('save', async function (next) {
-  if (this.role === 'cashier' && !this.cashierId) {
-    try {
-      // Generate a cashier ID
-      this.cashierId = await this.constructor.generateCashierId();
-    } catch (err) {
-      return next(err);
-    }
+  // Skip if password is not modified and cashierId exists
+  if (!this.isModified('password') && (!this.role === 'cashier' || this.cashierId)) {
+    return next();
   }
 
-  // Hash the password before saving
-  if (this.isModified('password')) {
-    try {
+  try {
+    // Generate cashier ID if needed
+    if (this.role === 'cashier' && !this.cashierId) {
+      this.cashierId = await this.constructor.generateCashierId();
+    }
+
+    // Hash password if modified
+    if (this.isModified('password')) {
       const salt = await bcrypt.genSalt(10);
       this.password = await bcrypt.hash(this.password, salt);
-    } catch (err) {
-      return next(err);
     }
-  }
 
-  next();
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Method to compare entered password with the stored hash

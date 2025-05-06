@@ -1,9 +1,22 @@
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import InventoryDashboard from "./pages/InventoryDashboard";
+import AddMedicines from "./pages/AddMedicines";
+import UpdateMedicine from "./pages/UpdateMedicine";
 import Login from "./pages/login";
+import SupplierOrder from "./components/SupplierOrder";  // New form for creating and editing orders
+import SupplierOrderList from "./components/SupplierOrderList"; // New list for viewing orders
+import PreviousSupplierOrders from "./components/PreviousSupplierOrders";
+import EditSupplierOrder from "./components/EditSupplierOrder";  // For handling order edits directly
+import AdminDashboard from "./pages/AdminDashboard";
 import CashierDashboard from "./pages/CashierDashboard";
 import SupplierDashboard from "./pages/SupplierDashboard";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import AdminDashboard from "./pages/Dashboard";
+import SupplierOrder from "./components/SupplierOrder";
+import SupplierOrderList from "./components/SupplierOrderList";
+import PreviousSupplierOrders from "./components/PreviousSupplierOrders";
+import EditSupplierOrder from "./components/EditSupplierOrder";
 
 function App() {
   return (
@@ -11,31 +24,67 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route 
-            path="/dashboard" 
-            element={
-              <DashboardLayout>
-                <AdminDashboard />
-              </DashboardLayout>
-            } 
-          />
-          <Route 
-            path="/cashier-dashboard" 
-            element={
-              <DashboardLayout>
-                <CashierDashboard />
-              </DashboardLayout>
-            } 
-          />
-          <Route 
-            path="/supplier-dashboard" 
-            element={
-              <DashboardLayout>
-                <SupplierDashboard />
-              </DashboardLayout>
-            } 
-          />
-        
+          
+          {/* Admin Routes with DashboardLayout */}
+          <Route path="/dashboard" element={
+            <DashboardLayout>
+              <AdminDashboard />
+            </DashboardLayout>
+          } />
+          <Route path="/inventory-dashboard" element={
+            <DashboardLayout>
+              <InventoryDashboard />
+            </DashboardLayout>
+          } />
+          <Route path="/add-item" element={
+            <DashboardLayout>
+              <AddMedicines />
+            </DashboardLayout>
+          } />
+          <Route path="/update-medicine/:id" element={
+            <DashboardLayout>
+              <UpdateMedicine />
+            </DashboardLayout>
+          } />
+
+          {/* Supplier Routes with DashboardLayout */}
+          <Route path="/supplier-dashboard" element={
+            <DashboardLayout>
+              <SupplierDashboard />
+            </DashboardLayout>
+          } />
+          <Route path="/orders" element={
+            <DashboardLayout>
+              <SupplierOrderList />
+            </DashboardLayout>
+          } />
+          <Route path="/orders/add" element={
+            <DashboardLayout>
+              <SupplierOrder fetchOrders={() => {}} />
+            </DashboardLayout>
+          } />
+          <Route path="/orders/edit/:id" element={
+            <DashboardLayout>
+              <EditSupplierOrder fetchOrders={() => {}} />
+            </DashboardLayout>
+          } />
+          <Route path="/previous-supplier-orders" element={
+            <DashboardLayout>
+              <PreviousSupplierOrders />
+            </DashboardLayout>
+          } />
+          <Route path="/edit-supplier/:id" element={
+            <DashboardLayout>
+              <EditSupplierOrder />
+            </DashboardLayout>
+          } />
+
+          {/* Cashier Routes with DashboardLayout */}
+          <Route path="/cashier-dashboard" element={
+            <DashboardLayout>
+              <CashierDashboard />
+            </DashboardLayout>
+          } />
         </Routes>
       </Router>
     </div>

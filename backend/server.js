@@ -2,30 +2,29 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const connectDB = require("./config/db");
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
+const supplierRoutes = require("./routes/supplierRoutes.js");
+const supplierOrderRoutes = require("./routes/supplierOrderRoutes");
+const medicineRoutes = require("./routes/medicineRoutes");
 
-
-dotenv.config(); // Load environment variables
-
+dotenv.config();
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json()); // Parse JSON bodies
+app.use(bodyParser.json());
+app.use(express.json());
 
-// MongoDB connection
-const uri = process.env.MONGO_URI;
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch((err) => {
-    console.log('Error connecting to MongoDB:', err);
-  });
+// Connect to MongoDB
+connectDB();
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use("/api/suppliers", supplierRoutes);
+app.use("/api/supplierorders", supplierOrderRoutes);
+app.use("/api/medicines", medicineRoutes);
 
 
 // Start the server
