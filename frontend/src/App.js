@@ -8,18 +8,22 @@ import SupplierOrder from "./components/SupplierOrder";
 import SupplierOrderList from "./components/SupplierOrderList";
 import PreviousSupplierOrders from "./components/PreviousSupplierOrders";
 import EditSupplierOrder from "./components/EditSupplierOrder";
-import AdminDashboard from "./pages/Dashboard"; // Changed this import
+import AdminDashboard from "./pages/Dashboard";
 import CashierDashboard from "./pages/CashierDashboard";
 import SupplierDashboard from "./pages/SupplierDashboard";
 import DashboardLayout from "./components/layout/DashboardLayout";
-
+import SalesDashboard from "./pages/SalesDashboard";
+import BillingForm from "./pages/BillingForm";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <div className="w-full min-h-screen bg-gray-50">
       <Router>
+        <Toaster />
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/" element={<SalesDashboard />} />
           
           {/* Admin Routes with DashboardLayout */}
           <Route path="/dashboard" element={
@@ -27,6 +31,14 @@ function App() {
               <AdminDashboard />
             </DashboardLayout>
           } />
+          
+          {/* Add Sales Route */}
+          <Route path="/sales" element={
+            <DashboardLayout>
+              <SalesDashboard />
+            </DashboardLayout>
+          } />
+
           <Route path="/inventory-dashboard" element={
             <DashboardLayout>
               <InventoryDashboard />
@@ -81,6 +93,9 @@ function App() {
               <CashierDashboard />
             </DashboardLayout>
           } />
+
+          {/* Sales Routes */}
+          <Route path="/billing" element={<BillingForm />} />
         </Routes>
       </Router>
     </div>
@@ -88,3 +103,4 @@ function App() {
 }
 
 export default App;
+

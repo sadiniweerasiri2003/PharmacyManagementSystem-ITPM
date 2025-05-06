@@ -23,7 +23,7 @@ const Login = () => {
       localStorage.setItem("role", data.role);
 
       if (data.role === "admin") navigate("/dashboard");
-      else if (data.role === "cashier") navigate("/cashier-dashboard");
+      else if (data.role === "cashier") navigate("/billing");
       else if (data.role === "supplier") navigate("/supplier-dashboard");
     } else {
       alert("Invalid credentials");
