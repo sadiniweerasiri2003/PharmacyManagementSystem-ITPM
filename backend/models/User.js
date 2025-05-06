@@ -22,7 +22,6 @@ const userSchema = new mongoose.Schema({
     unique: true,
   },
 });
-
 // Static method to generate a cashier ID
 userSchema.statics.generateCashierId = async function () {
   const count = await this.countDocuments({ role: 'cashier' });
@@ -30,29 +29,28 @@ userSchema.statics.generateCashierId = async function () {
   return newCashierId;
 };
 
-// Pre-save hook to hash password and generate cashier ID
+// Pre-save hook to auto-generate the cashier ID for cashiers
 userSchema.pre('save', async function (next) {
-  // Skip if password is not modified and cashierId exists
-  if (!this.isModified('password') && (!this.role === 'cashier' || this.cashierId)) {
-    return next();
+  if (this.role === 'cashier' && !this.cashierId) {
+    try {
+      // Generate a cashier ID
+      this.cashierId = await this.constructor.generateCashierId();
+    } catch (err) {
+      return next(err);
+    }
   }
 
-  try {
-    // Generate cashier ID if needed
-    if (this.role === 'cashier' && !this.cashierId) {
-      this.cashierId = await this.constructor.generateCashierId();
-    }
-
-    // Hash password if modified
-    if (this.isModified('password')) {
+  // Hash the password before saving
+  if (this.isModified('password')) {
+    try {
       const salt = await bcrypt.genSalt(10);
       this.password = await bcrypt.hash(this.password, salt);
+    } catch (err) {
+      return next(err);
     }
-
-    next();
-  } catch (err) {
-    next(err);
   }
+
+  next();
 });
 
 // Method to compare entered password with the stored hash

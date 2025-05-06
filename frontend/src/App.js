@@ -4,19 +4,15 @@ import InventoryDashboard from "./pages/InventoryDashboard";
 import AddMedicines from "./pages/AddMedicines";
 import UpdateMedicine from "./pages/UpdateMedicine";
 import Login from "./pages/login";
-import SupplierOrder from "./components/SupplierOrder";  // New form for creating and editing orders
-import SupplierOrderList from "./components/SupplierOrderList"; // New list for viewing orders
-import PreviousSupplierOrders from "./components/PreviousSupplierOrders";
-import EditSupplierOrder from "./components/EditSupplierOrder";  // For handling order edits directly
-import AdminDashboard from "./pages/AdminDashboard";
-import CashierDashboard from "./pages/CashierDashboard";
-import SupplierDashboard from "./pages/SupplierDashboard";
-import DashboardLayout from "./components/layout/DashboardLayout";
-import AdminDashboard from "./pages/Dashboard";
 import SupplierOrder from "./components/SupplierOrder";
 import SupplierOrderList from "./components/SupplierOrderList";
 import PreviousSupplierOrders from "./components/PreviousSupplierOrders";
 import EditSupplierOrder from "./components/EditSupplierOrder";
+import AdminDashboard from "./pages/Dashboard"; // Changed this import
+import CashierDashboard from "./pages/CashierDashboard";
+import SupplierDashboard from "./pages/SupplierDashboard";
+import DashboardLayout from "./components/layout/DashboardLayout";
+
 
 function App() {
   return (

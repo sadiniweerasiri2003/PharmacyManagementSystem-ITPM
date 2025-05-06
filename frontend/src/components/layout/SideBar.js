@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 import {
   LayoutGridIcon,
   PackageIcon,
@@ -10,15 +11,19 @@ import {
   SettingsIcon,
   LockIcon
 } from 'lucide-react'
-const NavItem = ({ icon, label }) => {
+
+const NavItem = ({ icon, label, onClick }) => {
   return (
-    <div className="flex items-center py-3 px-2 text-gray-300 hover:text-white cursor-pointer">
+    <div className="flex items-center py-3 px-2 text-gray-300 hover:text-white cursor-pointer" onClick={onClick}>
       <div className="mr-3">{icon}</div>
       <span>{label}</span>
     </div>
   )
 }
+
 const Sidebar = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="w-[220px] bg-[#0a3833] text-white flex flex-col h-full">
       <div className="p-4 flex items-center border-b border-[#164e47]">
@@ -29,14 +34,35 @@ const Sidebar = () => {
       </div>
       <div className="flex-1 py-4">
         <div className="px-4 mb-6">
-        <NavItem icon={<PackageIcon size={20} />} label="Overview" />
-          <NavItem icon={<PackageIcon size={20} />} label="Medicines" />
-          <NavItem icon={<ShoppingCartIcon size={20} />} label="Sales" />
-          <NavItem icon={<TrendingUpIcon size={20} />} label="Suppliers" />
-          <NavItem icon={<UsersIcon size={20} />} label="SupplierOrders" />
+          <NavItem 
+            icon={<PackageIcon size={20} />} 
+            label="Overview" 
+            onClick={() => navigate('/dashboard')}
+          />
+          <NavItem 
+            icon={<PackageIcon size={20} />} 
+            label="Medicines" 
+            onClick={() => navigate('/inventory-dashboard')}
+          />
+          <NavItem 
+            icon={<ShoppingCartIcon size={20} />} 
+            label="Sales" 
+            onClick={() => navigate('/sales')}
+          />
+          <NavItem 
+            icon={<TrendingUpIcon size={20} />} 
+            label="Suppliers" 
+            onClick={() => navigate('/supplier-dashboard')}
+          />
+          <NavItem 
+            icon={<UsersIcon size={20} />} 
+            label="SupplierOrders" 
+            onClick={() => navigate('/orders')}
+          />
         </div>
       </div>
     </div>
   )
 }
+
 export default Sidebar;
