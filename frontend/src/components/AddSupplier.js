@@ -29,7 +29,7 @@ const AddSupplier = () => {
       await axios.post("http://localhost:5001/api/suppliers", form);
       setForm({ name: "", phoneNumber: "", email: "", address: "", leadTimeDays: 0 });
       setSuccess("Supplier added successfully!");
-      setTimeout(() => navigate("/suppliers"), 1500);
+      setTimeout(() => navigate("/supplier-dashboard"), 1500);
     } catch (err) {
       setError("Error saving supplier. Please try again.");
       console.error("API Error:", err.message);
@@ -41,15 +41,7 @@ const AddSupplier = () => {
     <div className="p-8 max-w-4xl mx-auto bg-white shadow-xl rounded-lg border border-gray-200">
       <h1 className="text-3xl font-semibold text-center text-gray-800 mb-6">Add New Supplier</h1>
       
-      <div className="flex justify-end mb-4">
-        <button 
-          onClick={() => navigate("/suppliers")}
-          className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition"
-        >
-          View Suppliers
-        </button>
-      </div>
-
+      
       {error && <p className="text-red-600 text-center font-medium mb-4">{error}</p>}
       {success && <p className="text-green-600 text-center font-medium mb-4">{success}</p>}
 
@@ -101,6 +93,7 @@ const AddSupplier = () => {
         />
         <button
           type="submit"
+          onClick={() => navigate("/supplier-dashboard")}
           className="col-span-2 bg-blue-600 text-white font-bold py-3 rounded-md hover:bg-blue-700 transition duration-300"
           disabled={loading}
         >
