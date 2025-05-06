@@ -8,8 +8,6 @@ const SupplierDashboard = () => {
   const [ongoingOrders, setOngoingOrders] = useState([]);
   const [previousOrders, setPreviousOrders] = useState([]);
   const [allOrders, setAllOrders] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("suppliers");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -21,7 +19,6 @@ const SupplierDashboard = () => {
       setLoading(true);
       const response = await axios.get("http://localhost:5001/api/suppliers");
       setSuppliers(response.data);
-      setFilteredData(response.data);
     } catch (err) {
       setError("Error fetching suppliers");
       console.error(err);
@@ -35,7 +32,6 @@ const SupplierDashboard = () => {
       setLoading(true);
       const response = await axios.get("http://localhost:5001/api/supplierorders?status=Pending");
       setOngoingOrders(response.data);
-      setFilteredData(response.data);
     } catch (err) {
       setError("Error fetching ongoing orders");
       console.error(err);
@@ -49,7 +45,6 @@ const SupplierDashboard = () => {
       setLoading(true);
       const response = await axios.get("http://localhost:5001/api/supplierorders?status=Completed");
       setPreviousOrders(response.data);
-      setFilteredData(response.data);
     } catch (err) {
       setError("Error fetching previous orders");
       console.error(err);
@@ -63,7 +58,6 @@ const SupplierDashboard = () => {
       setLoading(true);
       const response = await axios.get("http://localhost:5001/api/supplierorders");
       setAllOrders(response.data);
-      setFilteredData(response.data);
     } catch (err) {
       setError("Error fetching all orders");
       console.error(err);
@@ -72,45 +66,9 @@ const SupplierDashboard = () => {
     }
   };
 
-  useEffect(() => {
-    if (activeTab === "suppliers") fetchSuppliers();
-    if (activeTab === "ongoingOrders") fetchOngoingOrders();
-    if (activeTab === "previousOrders") fetchPreviousOrders();
-    if (activeTab === "allOrders") fetchAllOrders();
-  }, [activeTab]);
-
-  useEffect(() => {
-    let dataToFilter = [];
-    if (activeTab === "suppliers") dataToFilter = suppliers;
-    if (activeTab === "ongoingOrders") dataToFilter = ongoingOrders;
-    if (activeTab === "previousOrders") dataToFilter = previousOrders;
-    if (activeTab === "allOrders") dataToFilter = allOrders;
-
-    setFilteredData(
-      dataToFilter.filter((item) => {
-        const searchLower = searchTerm.toLowerCase();
-        if (activeTab === "suppliers") {
-          return (
-            item.name.toLowerCase().includes(searchLower) ||
-            item.email.toLowerCase().includes(searchLower) ||
-            item.phoneNumber.toLowerCase().includes(searchLower)
-          );
-        } else {
-          return (
-            (item.supplierId || item.supplierName).toLowerCase().includes(searchLower) ||
-            (item.orderId || item._id).toString().toLowerCase().includes(searchLower) ||
-            (item.orderStatus || "Pending").toLowerCase().includes(searchLower)
-          );
-        }
-      })
-    );
-  }, [searchTerm, activeTab, suppliers, ongoingOrders, previousOrders, allOrders]);
-
   const handleDeleteSupplier = async (supplierId) => {
-    if (!window.confirm(`Are you sure you want to delete this supplier?`)) {
-      return;
-    }
-
+    if (!window.confirm("Are you sure you want to delete this supplier?")) return;
+    
     try {
       await axios.delete(`http://localhost:5001/api/suppliers/${supplierId}`);
       fetchSuppliers();
@@ -120,77 +78,278 @@ const SupplierDashboard = () => {
     }
   };
 
-  const handleDeleteOrder = async (orderId) => {
-    if (!window.confirm(`Are you sure you want to delete order ${orderId}?`)) {
-      return;
-    }
+  useEffect(() => {
+    fetchSuppliers();
+    fetchOngoingOrders();
+    fetchPreviousOrders();
+    fetchAllOrders();
+  }, []);
 
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-10">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">Supplier Dashboard</h1>
+        {activeTab === "suppliers" && (
+          <button
+            onClick={() => navigate("/suppliers/add")}
+            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-300 shadow-md"
+          >
+            + Create New Supplier
+          </button>
+        )}
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-3 gap-6 mb-6">
+        <div className="bg-white p-5 rounded-lg shadow">
+          <h3 className="text-lg font-semibold">Total Suppliers</h3>
+          <p className="text-3xl font-bold">{suppliers.length}</p>
+        </div>
+        <div className="bg-white p-5 rounded-lg shadow">
+          <h3 className="text-lg font-semibold">Ongoing Orders</h3>
+          <p className="text-3xl font-bold">{ongoingOrders.length}</p>
+        </div>
+        <div className="bg-white p-5 rounded-lg shadow">
+          <h3 className="text-lg font-semibold">Completed Orders</h3>
+          <p className="text-3xl font-bold">{previousOrders.length}</p>
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === "suppliers" && (
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Suppliers</h2>
+          <table className="w-full bg-white shadow-md rounded-lg">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="p-4">Name</th>
+                <th className="p-4">Email</th>
+                <th className="p-4">Phone</th>
+                <th className="p-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {suppliers.map((supplier) => (
+                <tr key={supplier._id} className="border-b">
+                  <td className="p-4">{supplier.name}</td>
+                  <td className="p-4">{supplier.email}</td>
+                  <td className="p-4">{supplier.phoneNumber}</td>
+                  <td className="p-4 flex space-x-2">
+                    <button
+                      onClick={() => navigate(`/suppliers/edit/${supplier._id}`)}
+                      className="text-blue-500 hover:text-blue-700 transition duration-300"
+                      title="Edit"
+                    >
+                      <FaEdit size={20} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSupplier(supplier._id)}
+                      className="text-red-500 hover:text-red-700 transition duration-300"
+                      title="Delete"
+                    >
+                      <FaTrash size={20} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {activeTab === "ongoingOrders" && (
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Ongoing Orders</h2>
+          <table className="w-full bg-white shadow-md rounded-lg">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="p-4">Supplier</th>
+                <th className="p-4">Order ID</th>
+                <th className="p-4">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ongoingOrders.map((order) => (
+                <tr key={order._id} className="border-b">
+                  <td className="p-4">{order.supplierName}</td>
+                  <td className="p-4">{order._id}</td>
+                  <td className="p-4">
+                    <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">Pending</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {activeTab === "previousOrders" && (
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Previous Orders</h2>
+          <table className="w-full bg-white shadow-md rounded-lg">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="p-4">Supplier</th>
+                <th className="p-4">Order ID</th>
+                <th className="p-4">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {previousOrders.map((order) => (
+                <tr key={order._id} className="border-b">
+                  <td className="p-4">{order.supplierName}</td>
+                  <td className="p-4">{order._id}</td>
+                  <td className="p-4">
+                    <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Completed</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {activeTab === "allOrders" && (
+        <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center justify-center text-center">
+          <h2 className="text-3xl font-semibold text-gray-800 mb-6">Manage Orders</h2>
+          <div className="flex space-x-6">
+            <button
+              onClick={() => navigate("/orders")}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md"
+            >
+              View All Orders
+            </button>
+            <button
+              onClick={() => navigate("/orders/add")}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 shadow-md"
+            >
+              + Create New Order
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SupplierDashboard;
+
+/*
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
+const SupplierDashboard = () => {
+  const [suppliers, setSuppliers] = useState([]);
+  const [ongoingOrders, setOngoingOrders] = useState([]);
+  const [previousOrders, setPreviousOrders] = useState([]);
+  const [allOrders, setAllOrders] = useState([]);
+  const [activeTab, setActiveTab] = useState("suppliers");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  // Define all fetch functions
+  const fetchSuppliers = async () => {
     try {
-      await axios.delete(`http://localhost:5001/api/supplierorders/${orderId}`);
-      if (activeTab === "ongoingOrders") fetchOngoingOrders();
-      if (activeTab === "previousOrders") fetchPreviousOrders();
-      if (activeTab === "allOrders") fetchAllOrders();
+      setLoading(true);
+      const response = await axios.get("http://localhost:5001/api/suppliers");
+      setSuppliers(response.data);
     } catch (err) {
-      setError("Error deleting order");
+      setError("Error fetching suppliers");
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) return <div className="text-center text-gray-500 p-10">Loading...</div>;
-  if (error) return <div className="text-center text-red-500 p-10">{error}</div>;
+  const fetchOngoingOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("http://localhost:5001/api/supplierorders?status=Pending");
+      setOngoingOrders(response.data);
+    } catch (err) {
+      setError("Error fetching ongoing orders");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPreviousOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("http://localhost:5001/api/supplierorders?status=Completed");
+      setPreviousOrders(response.data);
+    } catch (err) {
+      setError("Error fetching previous orders");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("http://localhost:5001/api/supplierorders");
+      setAllOrders(response.data);
+    } catch (err) {
+      setError("Error fetching all orders");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSuppliers();
+    fetchOngoingOrders();
+    fetchPreviousOrders();
+    fetchAllOrders();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
+     
       <aside className="w-64 bg-white p-5 shadow-lg">
-        <h2 className="text-xl font-bold mb-5 text-blue-800">Admin Panel</h2>
-        <ul className="space-y-2">
-          <li
-            className={`py-2 px-4 rounded-lg cursor-pointer transition ${
-              activeTab === "suppliers"
-                ? "bg-gradient-to-r from-blue-500 to-teal-500 text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-            onClick={() => setActiveTab("suppliers")}
+        <h2 className="text-xl font-bold mb-5">Admin Panel</h2>
+        <ul>
+          <li 
+            className={`py-2 px-4 rounded-lg cursor-pointer ${activeTab === "suppliers" ? "bg-blue-500 text-white" : "text-gray-700"}`} 
+            onClick={() => {
+              setActiveTab("suppliers");
+              navigate("/suppliers");
+            }}
           >
             Suppliers
           </li>
-          <li
-            className={`py-2 px-4 rounded-lg cursor-pointer transition ${
-              activeTab === "ongoingOrders"
-                ? "bg-gradient-to-r from-blue-500 to-teal-500 text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
+          <li 
+            className={`py-2 px-4 rounded-lg cursor-pointer ${activeTab === "ongoingOrders" ? "bg-blue-500 text-white" : "text-gray-700"}`} 
             onClick={() => setActiveTab("ongoingOrders")}
           >
             Ongoing Orders
           </li>
-          <li
-            className={`py-2 px-4 rounded-lg cursor-pointer transition ${
-              activeTab === "previousOrders"
-                ? "bg-gradient-to-r from-blue-500 to-teal-500 text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
+          <li 
+            className={`py-2 px-4 rounded-lg cursor-pointer ${activeTab === "previousOrders" ? "bg-blue-500 text-white" : "text-gray-700"}`} 
             onClick={() => setActiveTab("previousOrders")}
           >
             Previous Orders
           </li>
-          <li
-            className={`py-2 px-4 rounded-lg cursor-pointer transition ${
-              activeTab === "allOrders"
-                ? "bg-gradient-to-r from-blue-500 to-teal-500 text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
+          <li 
+            className={`py-2 px-4 rounded-lg cursor-pointer ${activeTab === "allOrders" ? "bg-blue-500 text-white" : "text-gray-700"}`} 
             onClick={() => setActiveTab("allOrders")}
           >
             All Orders
           </li>
-          <li
-            className={`py-2 px-4 rounded-lg cursor-pointer transition ${
-              activeTab === "createOrder"
-                ? "bg-gradient-to-r from-blue-500 to-teal-500 text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
+          <li 
+            className={`py-2 px-4 rounded-lg cursor-pointer ${activeTab === "createOrder" ? "bg-blue-500 text-white" : "text-gray-700"}`} 
             onClick={() => navigate("/orders/add")}
           >
             Create New Order
@@ -198,169 +357,145 @@ const SupplierDashboard = () => {
         </ul>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 p-6">
-        <div className="max-w-7xl mx-auto bg-white shadow-xl rounded-lg p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-4xl font-extrabold text-blue-800">
-              {activeTab === "suppliers" && "Suppliers"}
-              {activeTab === "ongoingOrders" && "Ongoing Orders"}
-              {activeTab === "previousOrders" && "Previous Orders"}
-              {activeTab === "allOrders" && "All Orders"}
-            </h1>
-            {activeTab === "suppliers" && (
-              <button
-                onClick={() => navigate("/suppliers/add")}
-                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 shadow-md"
-              >
-                + Create New Supplier
-              </button>
-            )}
-          </div>
-
-          {/* Summary Cards */}
-          <div className="grid grid-cols-3 gap-6 mb-6">
-            <div className="bg-white p-5 rounded-lg shadow border border-gray-200">
-              <h3 className="text-lg font-semibold">Total Suppliers</h3>
-              <p className="text-3xl font-bold text-blue-600">{suppliers.length}</p>
-            </div>
-            <div className="bg-white p-5 rounded-lg shadow border border-gray-200">
-              <h3 className="text-lg font-semibold">Ongoing Orders</h3>
-              <p className="text-3xl font-bold text-yellow-600">{ongoingOrders.length}</p>
-            </div>
-            <div className="bg-white p-5 rounded-lg shadow border border-gray-200">
-              <h3 className="text-lg font-semibold">Completed Orders</h3>
-              <p className="text-3xl font-bold text-green-600">{previousOrders.length}</p>
-            </div>
-          </div>
-
-          {/* Search Input */}
-          <div className="mb-6 flex items-center justify-between relative">
-            <input
-              type="text"
-              placeholder={
-                activeTab === "suppliers"
-                  ? "Search by name, email, or phone"
-                  : "Search by Order ID, Supplier ID, or Status"
-              }
-              className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <span className="absolute right-4 top-3 text-gray-500 text-sm">
-              {filteredData.length} out of{" "}
-              {activeTab === "suppliers"
-                ? suppliers.length
-                : activeTab === "ongoingOrders"
-                ? ongoingOrders.length
-                : activeTab === "previousOrders"
-                ? previousOrders.length
-                : allOrders.length}
-            </span>
-          </div>
-
-          {/* Tab Content */}
+      
+      <main className="flex-1 p-10">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">Supplier Dashboard</h1>
           {activeTab === "suppliers" && (
-            <div className="overflow-x-auto bg-gray-50 p-4 rounded-lg shadow-md">
-              <table className="min-w-full bg-white rounded-lg overflow-hidden">
-                <thead className="bg-gradient-to-r from-blue-500 to-teal-500 text-white">
-                  <tr>
-                    <th className="py-3 px-6 text-left">Name</th>
-                    <th className="py-3 px-6 text-left">Email</th>
-                    <th className="py-3 px-6 text-left">Phone</th>
-                    <th className="py-3 px-6 text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="text-gray-700">
-                  {filteredData.map((supplier) => (
-                    <tr key={supplier._id} className="border-b hover:bg-gray-100">
-                      <td className="py-3 px-6">{supplier.name}</td>
-                      <td className="py-3 px-6">{supplier.email}</td>
-                      <td className="py-3 px-6">{supplier.phoneNumber}</td>
-                      <td className="py-3 px-6 flex space-x-4">
-                        <button
-                          onClick={() => navigate(`/suppliers/edit/${supplier._id}`)}
-                          className="text-yellow-500 hover:text-yellow-700 transition duration-300"
-                        >
-                          <FaEdit size={20} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteSupplier(supplier._id)}
-                          className="text-red-500 hover:text-red-700 transition duration-300"
-                        >
-                          <FaTrash size={20} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {(activeTab === "ongoingOrders" || activeTab === "previousOrders" || activeTab === "allOrders") && (
-            <div className="overflow-x-auto bg-gray-50 p-4 rounded-lg shadow-md">
-              <table className="min-w-full bg-white rounded-lg overflow-hidden">
-                <thead className="bg-gradient-to-r from-blue-500 to-teal-500 text-white">
-                  <tr>
-                    <th className="py-3 px-6 text-left">Order ID</th>
-                    <th className="py-3 px-6 text-left">Supplier</th>
-                    <th className="py-3 px-6 text-left">Order Date</th>
-                    <th className="py-3 px-6 text-left">Expected Delivery</th>
-                    <th className="py-3 px-6 text-left">Status</th>
-                    <th className="py-3 px-6 text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="text-gray-700">
-                  {filteredData.map((order) => (
-                    <tr key={order._id} className="border-b hover:bg-gray-100">
-                      <td className="py-3 px-6">{order.orderId || order._id}</td>
-                      <td className="py-3 px-6">{order.supplierId || order.supplierName}</td>
-                      <td className="py-3 px-6">
-                        {order.orderDate ? new Date(order.orderDate).toLocaleDateString() : "-"}
-                      </td>
-                      <td className="py-3 px-6">
-                        {order.expectedDeliveryDate
-                          ? new Date(order.expectedDeliveryDate).toLocaleDateString()
-                          : "-"}
-                      </td>
-                      <td className="py-3 px-6">
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm ${
-                            (order.orderStatus || "Pending") === "Pending"
-                              ? "bg-yellow-200 text-yellow-700"
-                              : (order.orderStatus || "Pending") === "Completed"
-                              ? "bg-green-200 text-green-700"
-                              : "bg-red-200 text-red-700"
-                          }`}
-                        >
-                          {order.orderStatus || "Pending"}
-                        </span>
-                      </td>
-                      <td className="py-3 px-6 flex space-x-4">
-                        <button
-                          onClick={() => navigate(`/orders/edit/${order.orderId || order._id}`)}
-                          className="text-yellow-500 hover:text-yellow-700 transition duration-300"
-                        >
-                          <FaEdit size={20} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteOrder(order.orderId || order._id)}
-                          className="text-red-500 hover:text-red-700 transition duration-300"
-                        >
-                          <FaTrash size={20} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <button
+              onClick={() => navigate("/suppliers/add")}
+              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-300 shadow-md"
+            >
+              + Create New Supplier
+            </button>
           )}
         </div>
+
+        
+        <div className="grid grid-cols-3 gap-6 mb-6">
+          <div className="bg-white p-5 rounded-lg shadow">
+            <h3 className="text-lg font-semibold">Total Suppliers</h3>
+            <p className="text-3xl font-bold">{suppliers.length}</p>
+          </div>
+          <div className="bg-white p-5 rounded-lg shadow">
+            <h3 className="text-lg font-semibold">Ongoing Orders</h3>
+            <p className="text-3xl font-bold">{ongoingOrders.length}</p>
+          </div>
+          <div className="bg-white p-5 rounded-lg shadow">
+            <h3 className="text-lg font-semibold">Completed Orders</h3>
+            <p className="text-3xl font-bold">{previousOrders.length}</p>
+          </div>
+        </div>
+
+        
+        {activeTab === "suppliers" && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Suppliers</h2>
+            <table className="w-full bg-white shadow-md rounded-lg">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="p-4">Name</th>
+                  <th className="p-4">Email</th>
+                  <th className="p-4">Phone</th>
+                  <th className="p-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {suppliers.map((supplier) => (
+                  <tr key={supplier._id} className="border-b">
+                    <td className="p-4">{supplier.name}</td>
+                    <td className="p-4">{supplier.email}</td>
+                    <td className="p-4">{supplier.phoneNumber}</td>
+                    <td className="p-4">
+                      <button
+                        onClick={() => navigate(`/suppliers/edit/${supplier._id}`)}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {activeTab === "ongoingOrders" && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Ongoing Orders</h2>
+            <table className="w-full bg-white shadow-md rounded-lg">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="p-4">Supplier</th>
+                  <th className="p-4">Order ID</th>
+                  <th className="p-4">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ongoingOrders.map((order) => (
+                  <tr key={order._id} className="border-b">
+                    <td className="p-4">{order.supplierName}</td>
+                    <td className="p-4">{order._id}</td>
+                    <td className="p-4">
+                      <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">Pending</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {activeTab === "previousOrders" && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Previous Orders</h2>
+            <table className="w-full bg-white shadow-md rounded-lg">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="p-4">Supplier</th>
+                  <th className="p-4">Order ID</th>
+                  <th className="p-4">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {previousOrders.map((order) => (
+                  <tr key={order._id} className="border-b">
+                    <td className="p-4">{order.supplierName}</td>
+                    <td className="p-4">{order._id}</td>
+                    <td className="p-4">
+                      <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Completed</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {activeTab === "allOrders" && (
+          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center justify-center text-center">
+            <h2 className="text-3xl font-semibold text-gray-800 mb-6">Manage Orders</h2>
+            <div className="flex space-x-6">
+              <button
+                onClick={() => navigate("/orders")}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md"
+              >
+                View All Orders
+              </button>
+              <button
+                onClick={() => navigate("/orders/add")}
+                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 shadow-md"
+              >
+                + Create New Order
+              </button>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
 };
 
 export default SupplierDashboard;
+*/
