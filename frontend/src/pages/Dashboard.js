@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import MetricCard from '../components/dashboard/MetricCard'
 import SalesChart from '../components/dashboard/SalesChart'
 import OrdersTable from '../components/dashboard/OrdersTable'
@@ -12,6 +13,8 @@ import {
   ChevronDownIcon,
 } from 'lucide-react'
 const Dashboard = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-6">
       {/* Metrics Row */}
@@ -46,6 +49,12 @@ const Dashboard = () => {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Sales Analytics</h2>
           <div className="flex items-center space-x-2">
+            <button 
+              onClick={() => navigate('/sales')}
+              className="text-blue-600 text-sm font-medium hover:text-blue-800"
+            >
+              View All Sales
+            </button>
             <div className="bg-white border border-gray-200 rounded-md px-4 py-1.5 flex items-center">
               <span className="text-sm font-medium">This Month</span>
               <ChevronDownIcon size={16} className="ml-2" />

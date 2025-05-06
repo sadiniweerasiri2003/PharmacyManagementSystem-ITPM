@@ -43,9 +43,15 @@ const SalesDashboard = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-bold mb-6 text-center">Sales Records</h2>
-
-  
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Sales Records</h2>
+        <button
+          onClick={() => navigate('/billing')}
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200"
+        >
+          Create New Sale
+        </button>
+      </div>
 
       {/* Sales Table */}
       <div className="overflow-x-auto">

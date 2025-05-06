@@ -85,17 +85,17 @@ const SupplierOrderList = () => {
               <th className="py-3 px-6 text-left">Actions</th>
             </tr>
           </thead>
-          <tbody className="text-gray-700">
+          <tbody>
             {filteredOrders.map((order) => (
-              <tr key={order._id} className="border-b hover:bg-gray-100">
-                <td className="py-3 px-6">{order.orderId}</td>
+              <tr key={order.orderId || order._id} className="hover:bg-gray-50">
                 <td className="py-3 px-6">{order.supplierId}</td>
+                <td className="py-3 px-6">{order.orderId}</td>
                 <td className="py-3 px-6">{new Date(order.orderDate).toLocaleDateString()}</td>
                 <td className="py-3 px-6">{new Date(order.expectedDeliveryDate).toLocaleDateString()}</td>
                 <td className="py-3 px-6">
-                  {order.orderStatus === "Completed" ? (
-                    order.actualDeliveryDate ? new Date(order.actualDeliveryDate).toLocaleDateString() : "Not Available"
-                  ) : "-"}
+                  {order.orderStatus === "Completed" ? 
+                    (order.actualDeliveryDate ? new Date(order.actualDeliveryDate).toLocaleDateString() : "Not Available") 
+                    : "-"}
                 </td>
                 <td className="py-3 px-6">
                   <span

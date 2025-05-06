@@ -21,7 +21,7 @@ const BillingForm = () => {
   useEffect(() => {
     const fetchMedicines = async () => {
       try {
-        const response = await fetch("http://localhost:5001/api/medicineNames/getallnames");
+        const response = await fetch("http://localhost:5001/api/medicines");
         const data = await response.json();
         setAvailableMedicines(data);
       } catch (error) {
@@ -36,27 +36,34 @@ const BillingForm = () => {
     if (!selectedName) return;
   
     try {
-      const response = await fetch(`http://localhost:5001/api/medicineNames/getauto?name=${encodeURIComponent(selectedName)}`);
+      const response = await fetch(
+        `http://localhost:5001/api/medicines/search?name=${encodeURIComponent(selectedName.trim())}`
+      );
   
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
       }
   
       const data = await response.json();
-  
-      if (data && data.medicineId && data.price) {
-        setMedicine({
-          medicineId: data.medicineId,
-          name: selectedName,
-          qty_sold: "",
-          unitprice: data.price,
-          totalprice: 0,
-        });
-      } else {
-        alert("Medicine not found!");
-      }
+      
+      setMedicine({
+        medicineId: data.medicineId || '',
+        name: data.name || selectedName,
+        qty_sold: "",
+        unitprice: data.price || 0,
+        totalprice: 0,
+      });
     } catch (error) {
       console.error("Error fetching medicine details:", error);
+      setMedicine({
+        medicineId: "",
+        name: selectedName,
+        qty_sold: "",
+        unitprice: "",
+        totalprice: 0,
+      });
+      alert(`Error: ${error.message}`);
     }
   };
   
