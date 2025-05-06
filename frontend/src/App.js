@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import InventoryDashboard from "./pages/InventoryDashboard";
 import AddMedicines from "./pages/AddMedicines";
 import UpdateMedicine from "./pages/UpdateMedicine";
@@ -15,6 +15,9 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import SalesDashboard from "./pages/SalesDashboard";
 import BillingForm from "./pages/BillingForm";
 import { Toaster } from "react-hot-toast";
+import AdminRoute from "./components/AdminRoute";
+import CashierRoute from "./components/CashierRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -22,80 +25,77 @@ function App() {
       <Router>
         <Toaster />
         <Routes>
+          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<SalesDashboard />} />
-          
-          {/* Admin Routes with DashboardLayout */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
+          {/* Admin Routes */}
           <Route path="/dashboard" element={
-            <DashboardLayout>
-              <AdminDashboard />
-            </DashboardLayout>
+            <AdminRoute>
+              <DashboardLayout>
+                <AdminDashboard />
+              </DashboardLayout>
+            </AdminRoute>
           } />
           
-          {/* Add Sales Route */}
-          <Route path="/sales" element={
-            <DashboardLayout>
-              <SalesDashboard />
-            </DashboardLayout>
-          } />
-
           <Route path="/inventory-dashboard" element={
-            <DashboardLayout>
-              <InventoryDashboard />
-            </DashboardLayout>
+            <AdminRoute>
+              <DashboardLayout>
+                <InventoryDashboard />
+              </DashboardLayout>
+            </AdminRoute>
           } />
+
           <Route path="/add-item" element={
-            <DashboardLayout>
-              <AddMedicines />
-            </DashboardLayout>
+            <AdminRoute>
+              <DashboardLayout>
+                <AddMedicines />
+              </DashboardLayout>
+            </AdminRoute>
           } />
+
           <Route path="/update-medicine/:id" element={
-            <DashboardLayout>
-              <UpdateMedicine />
-            </DashboardLayout>
+            <AdminRoute>
+              <DashboardLayout>
+                <UpdateMedicine />
+              </DashboardLayout>
+            </AdminRoute>
           } />
 
-          {/* Supplier Routes with DashboardLayout */}
           <Route path="/supplier-dashboard" element={
-            <DashboardLayout>
-              <SupplierDashboard />
-            </DashboardLayout>
-          } />
-          <Route path="/orders" element={
-            <DashboardLayout>
-              <SupplierOrderList />
-            </DashboardLayout>
-          } />
-          <Route path="/orders/add" element={
-            <DashboardLayout>
-              <SupplierOrder fetchOrders={() => {}} />
-            </DashboardLayout>
-          } />
-          <Route path="/orders/edit/:id" element={
-            <DashboardLayout>
-              <EditSupplierOrder fetchOrders={() => {}} />
-            </DashboardLayout>
-          } />
-          <Route path="/previous-supplier-orders" element={
-            <DashboardLayout>
-              <PreviousSupplierOrders />
-            </DashboardLayout>
-          } />
-          <Route path="/edit-supplier/:id" element={
-            <DashboardLayout>
-              <EditSupplierOrder />
-            </DashboardLayout>
+            <AdminRoute>
+              <DashboardLayout>
+                <SupplierDashboard />
+              </DashboardLayout>
+            </AdminRoute>
           } />
 
-          {/* Cashier Routes with DashboardLayout */}
-          <Route path="/cashier-dashboard" element={
-            <DashboardLayout>
-              <CashierDashboard />
-            </DashboardLayout>
+          <Route path="/orders/*" element={
+            <AdminRoute>
+              <DashboardLayout>
+                <SupplierOrderList />
+              </DashboardLayout>
+            </AdminRoute>
           } />
 
-          {/* Sales Routes */}
-          <Route path="/billing" element={<BillingForm />} />
+          {/* Sales Dashboard - Accessible by both admin and cashier */}
+          <Route path="/sales" element={
+            <ProtectedRoute allowedRoles={['admin', 'cashier']}>
+              <DashboardLayout>
+                <SalesDashboard />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* Billing Form - Cashier Only */}
+          <Route path="/billing" element={
+            <CashierRoute>
+              <BillingForm />
+            </CashierRoute>
+          } />
+
+          {/* Catch all unauthorized routes */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>
     </div>

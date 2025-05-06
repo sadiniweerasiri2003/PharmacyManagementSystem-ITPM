@@ -53,7 +53,7 @@ const Dashboard = () => {
               onClick={() => navigate('/sales')}
               className="text-blue-600 text-sm font-medium hover:text-blue-800"
             >
-              View All Sales
+              View Sales History
             </button>
             <div className="bg-white border border-gray-200 rounded-md px-4 py-1.5 flex items-center">
               <span className="text-sm font-medium">This Month</span>

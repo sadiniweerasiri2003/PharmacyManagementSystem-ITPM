@@ -1,14 +1,14 @@
 import { Navigate } from 'react-router-dom';
 
-const ProtectedRoute = ({ children, allowedRoles }) => {
+const CashierRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   const userRole = localStorage.getItem('role');
 
-  if (!token || !allowedRoles.includes(userRole)) {
+  if (!token || userRole !== 'cashier') {
     return <Navigate to="/login" replace />;
   }
 
   return children;
 };
 
-export default ProtectedRoute;
+export default CashierRoute;

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const BillingForm = () => {
+  const navigate = useNavigate();
   const [medicine, setMedicine] = useState({
     medicineId: "",
     name: "",
@@ -12,7 +14,7 @@ const BillingForm = () => {
   const [medicines, setMedicines] = useState([]);
   const [availableMedicines, setAvailableMedicines] = useState([]);
   const [paymentType, setPaymentType] = useState("Cash");
-  const [cashierId, setCashierId] = useState("");
+  const cashierId = localStorage.getItem('cashierId');
   const [showForm, setShowForm] = useState(true);
   const [isCheckout, setIsCheckout] = useState(false);
   const [isSaleSubmitted, setIsSaleSubmitted] = useState(false);
@@ -30,6 +32,13 @@ const BillingForm = () => {
     };
     fetchMedicines();
   }, []);
+
+  useEffect(() => {
+    if (!cashierId) {
+      alert("No cashier ID found. Please login again.");
+      navigate('/login');
+    }
+  }, [cashierId, navigate]);
 
   // Fetch medicine details when selecting from dropdown
   const handleMedicineSelect = async (selectedName) => {
@@ -97,11 +106,6 @@ const BillingForm = () => {
       return;
     }
 
-    if (!cashierId) {
-      alert("Please enter cashier ID.");
-      return;
-    }
-
     try {
       const response = await fetch("http://localhost:5001/api/sales", {
         method: "POST",
@@ -109,7 +113,7 @@ const BillingForm = () => {
         body: JSON.stringify({
           medicines,
           payment_type: paymentType,
-          cashier_id: cashierId,
+          cashier_id: cashierId
         }),
       });
 
@@ -117,7 +121,6 @@ const BillingForm = () => {
         alert("Sale recorded successfully!");
         setMedicines([]);
         setPaymentType("Cash");
-        setCashierId("");
         setIsCheckout(false);
         setIsSaleSubmitted(true);
       } else {
@@ -134,7 +137,16 @@ const BillingForm = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-xl font-bold mb-4 text-center">Billing Form</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Billing Form</h2>
+        <button
+          onClick={() => navigate('/sales')}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          View Sales History
+        </button>
+      </div>
+      
       <form onSubmit={handleSubmit} className="flex space-x-6">
         {/* Left Section: Enter Medicine Details */}
         <div className="flex-1 space-y-4">
@@ -256,15 +268,6 @@ const BillingForm = () => {
                 <option value="Cash">Cash</option>
                 <option value="Credit">Credit</option>
               </select>
-
-              <input
-                type="text"
-                placeholder="Cashier ID"
-                value={cashierId}
-                onChange={(e) => setCashierId(e.target.value)}
-                required
-                className="w-full p-2 border rounded"
-              />
 
               <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">
                 Proceed Sale

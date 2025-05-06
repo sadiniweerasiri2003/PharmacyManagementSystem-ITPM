@@ -6,10 +6,8 @@ import {
   ShoppingCartIcon,
   TrendingUpIcon,
   UsersIcon,
-  CreditCardIcon,
-  LifeBuoyIcon,
-  SettingsIcon,
-  LockIcon
+  ChartBarIcon,
+  ClipboardListIcon
 } from 'lucide-react'
 
 const NavItem = ({ icon, label, onClick }) => {
@@ -23,6 +21,7 @@ const NavItem = ({ icon, label, onClick }) => {
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const userRole = localStorage.getItem('role');
 
   return (
     <div className="w-[220px] bg-[#0a3833] text-white flex flex-col h-full">
@@ -34,35 +33,52 @@ const Sidebar = () => {
       </div>
       <div className="flex-1 py-4">
         <div className="px-4 mb-6">
-          <NavItem 
-            icon={<PackageIcon size={20} />} 
-            label="Overview" 
-            onClick={() => navigate('/dashboard')}
-          />
-          <NavItem 
-            icon={<PackageIcon size={20} />} 
-            label="Medicines" 
-            onClick={() => navigate('/inventory-dashboard')}
-          />
-          <NavItem 
-            icon={<ShoppingCartIcon size={20} />} 
-            label="Sales" 
-            onClick={() => navigate('/sales')}
-          />
-          <NavItem 
-            icon={<TrendingUpIcon size={20} />} 
-            label="Suppliers" 
-            onClick={() => navigate('/supplier-dashboard')}
-          />
-          <NavItem 
-            icon={<UsersIcon size={20} />} 
-            label="SupplierOrders" 
-            onClick={() => navigate('/orders')}
-          />
+          {userRole === 'admin' ? (
+            <>
+              <NavItem 
+                icon={<LayoutGridIcon size={20} />} 
+                label="Overview" 
+                onClick={() => navigate('/dashboard')}
+              />
+              <NavItem 
+                icon={<PackageIcon size={20} />} 
+                label="Medicines" 
+                onClick={() => navigate('/inventory-dashboard')}
+              />
+              <NavItem 
+                icon={<UsersIcon size={20} />} 
+                label="Suppliers" 
+                onClick={() => navigate('/supplier-dashboard')}
+              />
+              <NavItem 
+                icon={<ClipboardListIcon size={20} />} 
+                label="Supplier Orders" 
+                onClick={() => navigate('/orders')}
+              />
+              <NavItem 
+                icon={<ChartBarIcon size={20} />} 
+                label="Sales History" 
+                onClick={() => navigate('/sales')}
+              />
+            </>
+          ) : (
+            <>
+              <NavItem 
+                icon={<ShoppingCartIcon size={20} />} 
+                label="Billing" 
+                onClick={() => navigate('/billing')}
+              />
+              <NavItem 
+                icon={<ChartBarIcon size={20} />} 
+                label="Sales History" 
+                onClick={() => navigate('/sales')}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Sidebar;

@@ -26,7 +26,7 @@ app.use(express.json());
 connectDB();
 
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', require('./routes/authRoutes'));
 app.use("/api/suppliers", supplierRoutes);
 app.use("/api/supplierorders", supplierOrderRoutes);
 app.use("/api/sales", salesRoutes);
