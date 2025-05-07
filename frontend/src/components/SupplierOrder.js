@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const SupplierOrder = ({ fetchOrders }) => {
+const SupplierOrder = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [form, setForm] = useState({
@@ -14,9 +14,20 @@ const SupplierOrder = ({ fetchOrders }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Self-contained fetch function
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get("http://localhost:5001/api/supplierorders");
+      setOrders(response.data);
+    } catch (err) {
+      setError("Error fetching orders.");
+      console.error("Fetch Error:", err.response ? err.response.data : err.message);
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
-  }, [fetchOrders]);
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -25,6 +36,7 @@ const SupplierOrder = ({ fetchOrders }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     const formattedMedicines = form.medicines
       ? form.medicines.split(",").map((med) => ({
@@ -46,13 +58,22 @@ const SupplierOrder = ({ fetchOrders }) => {
 
     try {
       await axios.post("http://localhost:5001/api/supplierorders", requestData);
-      setForm({ supplierId: "", expectedDeliveryDate: "", medicines: "", orderStatus: "Pending" });
-      fetchOrders();
+      setForm({
+        supplierId: "",
+        expectedDeliveryDate: "",
+        medicines: "",
+        orderStatus: "Pending",
+      });
+      
+      setTimeout(() => navigate("/orders"), 1500);
+      // Refresh orders after successful submission
+      await fetchOrders();
     } catch (err) {
-      setError("Error saving order.");
-      console.error("API Error:", err.response ? err.response.data : err.message);
+      setError("Error saving order. Please try again.");
+      console.error("Submission Error:", err.response ? err.response.data : err.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -61,8 +82,11 @@ const SupplierOrder = ({ fetchOrders }) => {
         Supplier Order Form
       </h1>
 
-      {error && <p className="text-red-600 text-center font-medium mb-4">{error}</p>}
-      {loading && <p className="text-center text-gray-500 font-medium mb-4">Processing...</p>}
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Supplier ID */}
@@ -126,10 +150,20 @@ const SupplierOrder = ({ fetchOrders }) => {
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition duration-300"
+          className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition duration-300 disabled:opacity-50"
           disabled={loading}
         >
-          {loading ? "Processing..." : "Create Order"}
+          {loading ? (
+            <span className="flex items-center justify-center">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Processing...
+            </span>
+          ) : (
+            "Create Order"
+          )}
         </button>
       </form>
     </div>

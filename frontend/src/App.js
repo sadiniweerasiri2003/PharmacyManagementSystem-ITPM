@@ -32,8 +32,6 @@ function App() {
           <Route path="/orders/add" element={<SupplierOrder />} />
           <Route path="/orders/edit/:id" element={<EditSupplierOrder />} />
           
-          {/* Other routes */}
-          <Route path="/previous-supplier-orders" element={<PreviousSupplierOrders />} />
           
           {/* Default route */}
           <Route path="/" element={<Login />} />

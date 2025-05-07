@@ -70,11 +70,22 @@ const SupplierDashboard = () => {
     if (!window.confirm("Are you sure you want to delete this supplier?")) return;
     
     try {
+      setLoading(true);
+      // Attempt deletion directly
       await axios.delete(`http://localhost:5001/api/suppliers/${supplierId}`);
-      fetchSuppliers();
+      // Update local state regardless of server response
+      setSuppliers(prev => prev.filter(s => s._id !== supplierId));
     } catch (err) {
-      setError("Error deleting supplier");
-      console.error(err);
+      if (err.response?.status === 404) {
+        // If not found, still remove from local state
+        setSuppliers(prev => prev.filter(s => s._id !== supplierId));
+        setError('Supplier was already deleted');
+      } else {
+        setError('Failed to delete supplier');
+        console.error('Delete error:', err);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,7 +113,6 @@ const SupplierDashboard = () => {
         )}
       </div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-6 mb-6">
         <div className="bg-white p-5 rounded-lg shadow">
           <h3 className="text-lg font-semibold">Total Suppliers</h3>
@@ -118,7 +128,6 @@ const SupplierDashboard = () => {
         </div>
       </div>
 
-      {/* Tab Content */}
       {activeTab === "suppliers" && (
         <div>
           <h2 className="text-2xl font-semibold mb-4">Suppliers</h2>
@@ -236,7 +245,6 @@ const SupplierDashboard = () => {
 };
 
 export default SupplierDashboard;
-
 /*
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
