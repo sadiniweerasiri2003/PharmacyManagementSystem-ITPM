@@ -10,6 +10,7 @@ db = client['test']  # Replace with your database name
 # Collections
 medicines_collection = db['medicines']
 sales_collection = db['sales']
+predictions_collection = db['medicine_predictions']  # Add this line
 
 # Load the pre-trained model
 model = joblib.load('general_prophet_model.pkl')
@@ -87,21 +88,60 @@ def predict_restock(medicines_data):
 
     return predictions
 
-# Fetch medicines data
-medicines_data = fetch_medicines_data()
+def has_data_changed():
+    # Get last prediction timestamp
+    last_prediction = predictions_collection.find_one(
+        sort=[('prediction_timestamp', -1)]
+    )
+    
+    if not last_prediction:
+        return True
 
-# Predict restock requirements
-predicted_data = predict_restock(medicines_data)
+    # Check for any medicine updates after last prediction
+    last_medicine_update = medicines_collection.find_one(
+        sort=[('updatedAt', -1)]
+    )
+    last_sale = sales_collection.find_one(
+        sort=[('orderdate_time', -1)]
+    )
 
-# Insert predictions into MongoDB
-predictions_collection = db['medicine_predictions']
+    last_prediction_time = last_prediction['prediction_timestamp']
+    
+    # Return True if there are newer updates
+    return (
+        (last_medicine_update and 'updatedAt' in last_medicine_update 
+         and last_medicine_update['updatedAt'] > last_prediction_time) or
+        (last_sale and last_sale['orderdate_time'] > last_prediction_time)
+    )
 
-if predicted_data:
-    predictions_collection.insert_many(predicted_data)
-    print("Predictions inserted into MongoDB")
-else:
-    print("No predictions to insert!")
+def update_predictions():
+    # First check if we need to update
+    if not has_data_changed():
+        print("No data changes detected, skipping prediction update")
+        return
 
-# Print predictions for reference
-for prediction in predicted_data:
-    print(prediction)
+    # Retrain the model
+    import train_model  # This will run the training script
+    
+    # Fetch medicines data
+    medicines_data = fetch_medicines_data()
+
+    # Generate new predictions
+    predicted_data = predict_restock(medicines_data)
+
+    if predicted_data:
+        # Delete all existing predictions
+        predictions_collection.delete_many({})
+        
+        # Insert new predictions
+        predictions_collection.insert_many(predicted_data)
+        print("Predictions updated in MongoDB")
+        
+        # Print new predictions for reference
+        for prediction in predicted_data:
+            print(prediction)
+    else:
+        print("No predictions to insert!")
+
+if __name__ == "__main__":
+    update_predictions()

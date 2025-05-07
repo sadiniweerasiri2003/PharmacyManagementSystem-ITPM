@@ -2,6 +2,7 @@ import pandas as pd
 import pymongo
 from prophet import Prophet
 import joblib
+import plotly.graph_objects as go
 
 # Connect to MongoDB
 client = pymongo.MongoClient("mongodb+srv://sadini20030104:Sadini%4003@cluster0.b3ltw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
