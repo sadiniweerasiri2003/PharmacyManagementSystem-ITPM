@@ -1,5 +1,8 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import InventoryDashboard from "./pages/InventoryDashboard";
+import AddMedicines from "./pages/AddMedicines";
+import UpdateMedicine from "./pages/UpdateMedicine";
 import Login from "./pages/login";
 import SupplierOrder from "./components/SupplierOrder";
 import SupplierOrderList from "./components/SupplierOrderList";
@@ -31,7 +34,12 @@ function App() {
           <Route path="/orders" element={<SupplierOrderList />} />
           <Route path="/orders/add" element={<SupplierOrder />} />
           <Route path="/orders/edit/:id" element={<EditSupplierOrder />} />
-          
+          <Route path="/previous-supplier-orders" element={<PreviousSupplierOrders />} />
+
+          {/* Inventory Management Routes */}
+          <Route path="/inventory-dashboard" element={<InventoryDashboard />} />
+          <Route path="/add-item" element={<AddMedicines />} />
+          <Route path="/update-medicine/:id" element={<UpdateMedicine />} />
           
           {/* Default route */}
           <Route path="/" element={<Login />} />

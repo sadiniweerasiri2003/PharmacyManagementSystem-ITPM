@@ -1,5 +1,5 @@
 const express = require("express");
-const Supplier = require("../models/supplier");
+const Supplier = require("../models/Supplier");
 
 const router = express.Router();
 
@@ -34,7 +34,7 @@ router.post("/", async (req, res) => {
     const savedSupplier = await newSupplier.save();
     res.status(201).json(savedSupplier);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(400).json({ error: err.message });
   }
 });
 
@@ -74,7 +74,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Update a Supplier
+// Update Supplier details
 router.put("/:id", async (req, res) => {
   try {
     const { name, phoneNumber, email, address, leadTimeDays } = req.body;
@@ -88,7 +88,6 @@ router.put("/:id", async (req, res) => {
     if (!updatedSupplier) {
       return res.status(404).json({ error: "Supplier not found" });
     }
-
     res.status(200).json(updatedSupplier);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -99,11 +98,9 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     const deletedSupplier = await Supplier.findOneAndDelete({ supplierId: req.params.id });
-
     if (!deletedSupplier) {
       return res.status(404).json({ error: "Supplier not found" });
     }
-
     res.status(200).json({ message: "Supplier deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
