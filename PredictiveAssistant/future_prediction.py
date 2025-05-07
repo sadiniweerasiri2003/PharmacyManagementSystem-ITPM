@@ -2,6 +2,13 @@ from pymongo import MongoClient
 import pandas as pd
 import joblib
 from datetime import datetime
+import logging
+
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 # MongoDB connection
 client = MongoClient('mongodb+srv://sadini20030104:Sadini%4003@cluster0.b3ltw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')  # Replace with your MongoDB URI
@@ -115,33 +122,33 @@ def has_data_changed():
     )
 
 def update_predictions():
-    # First check if we need to update
-    if not has_data_changed():
-        print("No data changes detected, skipping prediction update")
-        return
+    try:
+        if not has_data_changed():
+            logging.info("No data changes detected, skipping prediction update")
+            return
 
-    # Retrain the model
-    import train_model  # This will run the training script
-    
-    # Fetch medicines data
-    medicines_data = fetch_medicines_data()
+        logging.info("Starting model retraining...")
+        import train_model
 
-    # Generate new predictions
-    predicted_data = predict_restock(medicines_data)
+        logging.info("Fetching medicines data...")
+        medicines_data = fetch_medicines_data()
 
-    if predicted_data:
-        # Delete all existing predictions
-        predictions_collection.delete_many({})
-        
-        # Insert new predictions
-        predictions_collection.insert_many(predicted_data)
-        print("Predictions updated in MongoDB")
-        
-        # Print new predictions for reference
-        for prediction in predicted_data:
-            print(prediction)
-    else:
-        print("No predictions to insert!")
+        logging.info("Generating new predictions...")
+        predicted_data = predict_restock(medicines_data)
+
+        if predicted_data:
+            predictions_collection.delete_many({})
+            predictions_collection.insert_many(predicted_data)
+            logging.info(f"Successfully updated {len(predicted_data)} predictions in MongoDB")
+            
+            for prediction in predicted_data:
+                logging.debug(f"Prediction: {prediction}")
+        else:
+            logging.warning("No predictions generated!")
+
+    except Exception as e:
+        logging.error(f"Error during prediction update: {e}")
+        raise
 
 if __name__ == "__main__":
     update_predictions()
