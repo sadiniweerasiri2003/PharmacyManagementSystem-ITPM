@@ -109,11 +109,11 @@ const AddMedicines = () => {
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="bg-white p-6 shadow-lg rounded-2xl mb-6">
-        <h2 className="text-xl font-semibold mb-4">Add New Medicine</h2>
+        <h2 className="text-xl font-semibold mb-4 text-[#0a3833]">Add New Medicine</h2>
 
         {message && (
           <div className={`p-2 mb-4 rounded ${
-            message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            message.type === 'success' ? 'bg-[#CCFF33]/20 text-[#0a3833]' : 'bg-red-100 text-red-800'
           }`}>
             {message.text}
           </div>
@@ -226,7 +226,7 @@ const AddMedicines = () => {
           <div className="md:col-span-2">
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600"
+              className="w-full bg-[#0a3833] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#0a3833]/80"
             >
               Add Medicine
             </button>

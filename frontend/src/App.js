@@ -17,7 +17,7 @@ import EditSupplierOrder from "./components/EditSupplierOrder";
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-[#f5fff2]"> {/* Updated background color */}
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />

@@ -81,7 +81,7 @@ const UpdateMedicine = () => {
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <div className="w-full max-w-3xl mx-auto bg-white shadow-lg rounded-2xl p-8">
-        <h2 className="text-3xl font-semibold text-blue-700 mb-6 text-center">Update Medicine</h2>
+        <h2 className="text-3xl font-semibold text-[#0a3833] mb-6 text-center">Update Medicine</h2>
 
         {message && <p className="text-center text-lg font-medium text-red-500 mb-4">{message}</p>}
 
@@ -93,7 +93,7 @@ const UpdateMedicine = () => {
                 type="text"
                 name="name"
                 value={medicine.name || ""}
-                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CCFF33]"
                 onChange={handleChange}
                 required
               />
@@ -105,7 +105,7 @@ const UpdateMedicine = () => {
                 type="text"
                 name="batchNumber"
                 value={medicine.batchNumber || ""}
-                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CCFF33]"
                 onChange={handleChange}
                 required
               />
@@ -117,7 +117,7 @@ const UpdateMedicine = () => {
                 type="date"
                 name="expiryDate"
                 value={medicine.expiryDate || ""}
-                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CCFF33]"
                 onChange={handleChange}
                 required
               />
@@ -129,7 +129,7 @@ const UpdateMedicine = () => {
                 type="number"
                 name="price"
                 value={medicine.price || ""}
-                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CCFF33]"
                 onChange={handleChange}
                 required
               />
@@ -141,7 +141,7 @@ const UpdateMedicine = () => {
                 type="number"
                 name="quantity"
                 value={medicine.quantity || ""}
-                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CCFF33]"
                 onChange={handleChange}
                 required
               />
@@ -153,7 +153,7 @@ const UpdateMedicine = () => {
                 type="date"
                 name="lastRestockedDate"
                 value={medicine.lastRestockedDate || ""}
-                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CCFF33]"
                 onChange={handleChange}
                 required
               />
@@ -166,7 +166,7 @@ const UpdateMedicine = () => {
                 name="supplierId"
                 value={medicine.supplierId || ""}
                 onChange={handleChange}
-                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CCFF33]"
                 required
               >
                 <option value="">Select a Supplier</option>
@@ -181,7 +181,7 @@ const UpdateMedicine = () => {
             <div className="col-span-2 text-center">
               <button
                 type="submit"
-                className="w-full bg-green-500 text-white py-3 rounded-lg shadow-md hover:bg-green-600 transition-all duration-300"
+                className="w-full bg-[#0a3833] text-white py-3 rounded-lg shadow-md hover:bg-[#0a3833]/80 transition-all duration-300"
               >
                 Update Medicine
               </button>
