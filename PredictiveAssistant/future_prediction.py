@@ -61,37 +61,52 @@ def calculate_daily_sales_avg(medicine_id):
 
 # Function to predict medicine restock needs
 def predict_restock(medicines_data):
+    # First retrain the model with latest data
+    import train_model  # This will retrain and save new model
+    
+    # Now load the freshly trained model
+    model = joblib.load('general_prophet_model.pkl')
+    
     predictions = []
-
     for index, row in medicines_data.iterrows():
         medicine_id = row['medicineId']
         current_stock = row['quantity']
-        restocked_date = row.get('restockedDate', None)  # Some records might not have this
-
-        # Calculate daily sales average
-        daily_sales_avg = calculate_daily_sales_avg(medicine_id)
-
-        # If no sales data, skip this medicine
-        if daily_sales_avg == 0:
-            continue
-
-        # Calculate predicted restock time in days
-        predicted_restock_in_days = current_stock / daily_sales_avg
-
-        # Set a restock threshold
-        restock_threshold = 50  # Modify if needed
-        stock_to_restock = restock_threshold - current_stock if current_stock < restock_threshold else 0
-
-        # Append prediction
-        predictions.append({
-            'medicine_id': medicine_id,
-            'current_stock': current_stock,
-            'daily_sales_avg': daily_sales_avg,
-            'restocked_date': restocked_date,
-            'predicted_restock_in_days': round(predicted_restock_in_days),
-            'prediction_timestamp': datetime.now(),
-            'stock_to_restock': stock_to_restock
-        })
+        
+        # Use the medicine-specific forecasts from train_model
+        if medicine_id in train_model.medicine_forecasts:
+            forecast = train_model.medicine_forecasts[medicine_id]
+            
+            # Calculate daily average from Prophet forecast
+            recent_forecast = forecast.tail(90)  # Last 90 days
+            daily_sales_avg = recent_forecast['yhat'].mean()
+            
+            # Calculate days until depletion using Prophet's predictions
+            future_daily_sales = forecast.tail(30)['yhat'].mean()  # Next 30 days prediction
+            days_until_depletion = round(current_stock / future_daily_sales) if future_daily_sales > 0 else float('inf')
+            
+            # Calculate restock date
+            restock_date = datetime.now() + pd.Timedelta(days=days_until_depletion)
+            
+            # Get monthly need from Prophet's forecast
+            monthly_prediction = forecast.tail(30)['yhat'].sum()
+            peak_adjustment = monthly_prediction * 0.15
+            safety_stock = monthly_prediction * 0.20
+            
+            # Calculate final order quantity
+            total_monthly_need = int(monthly_prediction + peak_adjustment + safety_stock)
+            
+            predictions.append({
+                'medicine_id': medicine_id,
+                'current_stock': current_stock,
+                'daily_sales_avg': round(daily_sales_avg, 2),
+                'days_until_restock': days_until_depletion,
+                'predicted_restock_date': restock_date,
+                'order_quantity': total_monthly_need,
+                'prediction_timestamp': datetime.now(),
+                'peak_adjusted': True,
+                'includes_safety_stock': True,
+                'forecast_confidence': forecast.tail(30)['yhat_upper'].mean() - forecast.tail(30)['yhat'].mean()
+            })
 
     return predictions
 
@@ -127,22 +142,16 @@ def update_predictions():
             logging.info("No data changes detected, skipping prediction update")
             return
 
-        logging.info("Starting model retraining...")
-        import train_model
-
         logging.info("Fetching medicines data...")
         medicines_data = fetch_medicines_data()
 
-        logging.info("Generating new predictions...")
+        logging.info("Generating new predictions using trained model...")
         predicted_data = predict_restock(medicines_data)
 
         if predicted_data:
             predictions_collection.delete_many({})
             predictions_collection.insert_many(predicted_data)
             logging.info(f"Successfully updated {len(predicted_data)} predictions in MongoDB")
-            
-            for prediction in predicted_data:
-                logging.debug(f"Prediction: {prediction}")
         else:
             logging.warning("No predictions generated!")
 
