@@ -6,7 +6,7 @@ import {
   ShoppingCartIcon,
   TrendingUpIcon,
   UsersIcon,
-  ChartBarIcon,
+  BarChart3Icon,  // Changed from ChartBarIcon
   ClipboardListIcon
 } from 'lucide-react'
 
@@ -56,7 +56,7 @@ const Sidebar = () => {
                 onClick={() => navigate('/orders')}
               />
               <NavItem 
-                icon={<ChartBarIcon size={20} />} 
+                icon={<BarChart3Icon size={20} />}  // Changed from ChartBarIcon
                 label="Sales History" 
                 onClick={() => navigate('/sales')}
               />
@@ -69,7 +69,7 @@ const Sidebar = () => {
                 onClick={() => navigate('/billing')}
               />
               <NavItem 
-                icon={<ChartBarIcon size={20} />} 
+                icon={<BarChart3Icon size={20} />}  // Changed from ChartBarIcon
                 label="Sales History" 
                 onClick={() => navigate('/sales')}
               />
