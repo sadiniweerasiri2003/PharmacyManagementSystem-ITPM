@@ -1,5 +1,5 @@
 import React from "react";
-import { Edit2, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const MedicineList = ({ medicines, onEdit, handleDelete }) => {
@@ -49,17 +49,17 @@ const MedicineList = ({ medicines, onEdit, handleDelete }) => {
                   <div className="flex items-center justify-center gap-3">
                     <button
                       onClick={() => navigate(`/update-medicine/${medicine._id}`)}
-                      className="inline-flex items-center px-4 py-2 bg-[#1B5E20] text-white rounded-lg hover:bg-[#1B5E20]/90 transition-colors"
+                      className="p-2 bg-[#1B5E20] text-white rounded-full hover:bg-[#1B5E20]/90 transition-all duration-200 hover:scale-110"
+                      title="Edit Medicine"
                     >
-                      <Edit2 className="w-4 h-4 mr-2" />
-                      Edit
+                      <Pencil className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(medicine._id)}
-                      className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all duration-200 hover:scale-110"
+                      title="Delete Medicine"
                     >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </td>

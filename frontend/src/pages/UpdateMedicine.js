@@ -7,6 +7,7 @@ const UpdateMedicine = () => {
   const [medicine, setMedicine] = useState(null);
   const [message, setMessage] = useState("");
   const [suppliers, setSuppliers] = useState([]); // Add suppliers state
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     fetchMedicine();
@@ -65,11 +66,12 @@ const UpdateMedicine = () => {
       });
 
       if (response.ok) {
+        setShowPopup(true); // Show success popup
         setMessage("✅ Medicine updated successfully!");
-        // Add navigation after successful update
         setTimeout(() => {
-          navigate('/inventory-dashboard'); // Update this to match your dashboard route
-        }, 1500);
+          setShowPopup(false);
+          navigate('/inventory-dashboard');
+        }, 2000);
       } else {
         setMessage("❌ Failed to update medicine.");
       }
@@ -79,7 +81,27 @@ const UpdateMedicine = () => {
   };
 
   return (
-    <div className="p-8 bg-[#f5fff2] min-h-screen">
+    <div className="p-8 bg-[#f5fff2] min-h-screen relative">
+      {/* Success Popup */}
+      {showPopup && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white rounded-lg p-8 shadow-2xl transform transition-all animate-popup">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-[#1B5E20]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-[#1B5E20] mb-2">Update Successful!</h3>
+              <p className="text-gray-600 mb-6">Medicine details have been updated successfully.</p>
+              <div className="w-full h-2 bg-gray-200 rounded-full mb-4">
+                <div className="h-2 bg-[#1B5E20] rounded-full animate-progress"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="w-full max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-8">
         <h2 className="text-3xl font-bold text-[#1B5E20] mb-8 text-center">Update Medicine</h2>
 

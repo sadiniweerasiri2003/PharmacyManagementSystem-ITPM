@@ -17,6 +17,7 @@ const AddMedicines = () => {
   const [message, setMessage] = useState(null);
   const [errors, setErrors] = useState({});
   const [suppliers, setSuppliers] = useState([]); // Add this state for suppliers
+  const [showPopup, setShowPopup] = useState(false);
 
   // Generate Medicine ID
   const generateMedicineId = async () => {
@@ -92,8 +93,12 @@ const AddMedicines = () => {
       const data = await response.json();
 
       if (response.ok) {
+        setShowPopup(true); // Show popup on success
         setMessage({ type: 'success', text: "✅ Medicine added successfully!" });
-        setTimeout(() => navigate("/inventory-dashboard"), 1500);
+        setTimeout(() => {
+          setShowPopup(false);
+          navigate("/inventory-dashboard");
+        }, 2000);
       } else {
         // Handle specific error for duplicate medicine name
         if (data.field === 'name') {
@@ -107,7 +112,27 @@ const AddMedicines = () => {
   };
 
   return (
-    <div className="p-8 bg-[#f5fff2] min-h-screen">
+    <div className="p-8 bg-[#f5fff2] min-h-screen relative">
+      {/* Success Popup */}
+      {showPopup && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white rounded-lg p-8 shadow-2xl transform transition-all animate-popup">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-[#1B5E20]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-[#1B5E20] mb-2">Success!</h3>
+              <p className="text-gray-600 mb-6">Medicine has been added successfully.</p>
+              <div className="w-full h-2 bg-gray-200 rounded-full mb-4">
+                <div className="h-2 bg-[#1B5E20] rounded-full animate-progress"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="w-full max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-8">
         <h2 className="text-3xl font-bold text-[#1B5E20] mb-8 text-center">Add New Medicine</h2>
 
