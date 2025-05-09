@@ -6,6 +6,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
 const predictionRoutes = require('./routes/predictionRoutes');
+const medicineRoutes = require('./routes/medicineRoutes');
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ async function startServer() {
     // Routes
     app.use('/api/auth', authRoutes);
     app.use('/api/predictions', predictionRoutes);
+    app.use('/api/medicines', medicineRoutes); // Add this line
 
     // Start server
     const port = process.env.PORT || 5000;
