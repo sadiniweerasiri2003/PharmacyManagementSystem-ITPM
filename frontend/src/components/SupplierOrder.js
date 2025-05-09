@@ -35,6 +35,9 @@ const SupplierOrder = () => {
     const newErrors = {};
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const deliveryDate = form.expectedDeliveryDate ? new Date(form.expectedDeliveryDate) : null;
+    
+    if (deliveryDate) deliveryDate.setHours(0, 0, 0, 0);
 
     // Supplier ID validation
     if (!form.supplierId.trim()) {
@@ -47,16 +50,13 @@ const SupplierOrder = () => {
     if (!form.expectedDeliveryDate) {
       newErrors.expectedDeliveryDate = "Delivery date is required";
     } else {
-      const deliveryDate = new Date(form.expectedDeliveryDate);
-      deliveryDate.setHours(0, 0, 0, 0);
-      
-      if (deliveryDate <= today) {
-        newErrors.expectedDeliveryDate = "Delivery date must be in the future";
+      // For Pending status, date must be in future
+      if (form.orderStatus === "Pending" && deliveryDate <= today) {
+        newErrors.expectedDeliveryDate = "Pending orders must have future delivery dates";
       }
-
-      // Prevent Completed status for future dates
+      // For Completed status, date must be in past
       if (form.orderStatus === "Completed" && deliveryDate > today) {
-        newErrors.orderStatus = "Cannot complete an order with future delivery date";
+        newErrors.expectedDeliveryDate = "Completed orders must have past delivery dates";
       }
     }
 
@@ -77,8 +77,8 @@ const SupplierOrder = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     
-    // Convert supplierId to uppercase automatically
-    if (name === "supplierId") {
+    // Convert to uppercase for supplierId and medicines
+    if (name === "supplierId" || name === "medicines") {
       setForm({ ...form, [name]: value.toUpperCase() });
     } else {
       setForm({ ...form, [name]: value });
@@ -87,21 +87,6 @@ const SupplierOrder = () => {
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors({ ...errors, [name]: null });
-    }
-
-    // Additional validation when changing status or date
-    if (name === "orderStatus" || name === "expectedDeliveryDate") {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const deliveryDate = new Date(form.expectedDeliveryDate);
-      deliveryDate.setHours(0, 0, 0, 0);
-
-      if (value === "Completed" && deliveryDate > today) {
-        setErrors({
-          ...errors,
-          orderStatus: "Cannot complete an order with future delivery date"
-        });
-      }
     }
   };
 
@@ -159,22 +144,6 @@ const SupplierOrder = () => {
     }
   };
 
-  const getMinDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
-  };
-
-  // Check if selected date is in future
-  const isFutureDate = () => {
-    if (!form.expectedDeliveryDate) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const deliveryDate = new Date(form.expectedDeliveryDate);
-    deliveryDate.setHours(0, 0, 0, 0);
-    return deliveryDate > today;
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
@@ -223,8 +192,8 @@ const SupplierOrder = () => {
                     value={form.supplierId}
                     onChange={handleChange}
                     className={`w-full px-4 py-3 border ${errors.supplierId ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md shadow-sm uppercase`}
-                    required
                     style={{ textTransform: 'uppercase' }}
+                    required
                   />
                   {errors.supplierId && (
                     <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -246,7 +215,6 @@ const SupplierOrder = () => {
                     name="expectedDeliveryDate"
                     value={form.expectedDeliveryDate}
                     onChange={handleChange}
-                    min={getMinDate()}
                     className={`w-full px-4 py-3 border ${errors.expectedDeliveryDate ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md shadow-sm`}
                     required
                   />
@@ -271,7 +239,8 @@ const SupplierOrder = () => {
                     value={form.medicines}
                     onChange={handleChange}
                     rows="3"
-                    className={`w-full px-4 py-3 border ${errors.medicines ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md shadow-sm resize-none`}
+                    className={`w-full px-4 py-3 border ${errors.medicines ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md shadow-sm resize-none uppercase`}
+                    style={{ textTransform: 'uppercase' }}
                   ></textarea>
                   {errors.medicines ? (
                     <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -295,37 +264,19 @@ const SupplierOrder = () => {
                   name="orderStatus"
                   value={form.orderStatus}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border ${errors.orderStatus ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md shadow-sm`}
-                  disabled={isFutureDate() && form.orderStatus === "Completed"}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="Pending">Pending</option>
                   <option value="Cancelled">Cancelled</option>
-                  <option 
-                    value="Completed" 
-                    disabled={isFutureDate()}
-                  >
-                    Completed
-                  </option>
+                  <option value="Completed">Completed</option>
                 </select>
-                {errors.orderStatus && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
-                    <FaInfoCircle className="mr-1" size={12} />
-                    {errors.orderStatus}
-                  </p>
-                )}
-                {isFutureDate() && form.orderStatus === "Completed" && (
-                  <p className="mt-1 text-sm text-yellow-600 flex items-center">
-                    <FaInfoCircle className="mr-1" size={12} />
-                    Change delivery date to today or earlier to mark as Completed
-                  </p>
-                )}
               </div>
 
               {/* Submit Button */}
               <div className="pt-2">
                 <button
                   type="submit"
-                  disabled={loading || (isFutureDate() && form.orderStatus === "Completed")}
+                  disabled={loading}
                   className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed transition-colors duration-200"
                 >
                   {loading ? (
