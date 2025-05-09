@@ -1,16 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./pages/login";
-import AdminDashboard from "./pages/AdminDashboard";
-import CashierDashboard from "./pages/CashierDashboard";
-import SupplierDashboard from "./pages/SupplierDashboard";
+import PredictionsTable from "./components/PredictionsTable";
+
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
-        <Route path="/cashier-dashboard" element={<CashierDashboard />} />
-        <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
+        {/* Main route directly shows predictions table */}
+        <Route path="/" element={<PredictionsTable />} />
       </Routes>
     </Router>
   );
