@@ -17,6 +17,7 @@ const AddMedicines = () => {
   const [message, setMessage] = useState(null);
   const [errors, setErrors] = useState({});
   const [suppliers, setSuppliers] = useState([]); // Add this state for suppliers
+  const [showPopup, setShowPopup] = useState(false);
 
   // Generate Medicine ID
   const generateMedicineId = async () => {
@@ -92,8 +93,12 @@ const AddMedicines = () => {
       const data = await response.json();
 
       if (response.ok) {
+        setShowPopup(true); // Show popup on success
         setMessage({ type: 'success', text: "✅ Medicine added successfully!" });
-        setTimeout(() => navigate("/inventory-dashboard"), 1500);
+        setTimeout(() => {
+          setShowPopup(false);
+          navigate("/inventory-dashboard");
+        }, 2000);
       } else {
         // Handle specific error for duplicate medicine name
         if (data.field === 'name') {
@@ -107,49 +112,71 @@ const AddMedicines = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="bg-white p-6 shadow-lg rounded-2xl mb-6">
-        <h2 className="text-xl font-semibold mb-4">Add New Medicine</h2>
+    <div className="p-8 bg-[#f5fff2] min-h-screen relative">
+      {/* Success Popup */}
+      {showPopup && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white rounded-lg p-8 shadow-2xl transform transition-all animate-popup">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-[#1B5E20]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-[#1B5E20] mb-2">Success!</h3>
+              <p className="text-gray-600 mb-6">Medicine has been added successfully.</p>
+              <div className="w-full h-2 bg-gray-200 rounded-full mb-4">
+                <div className="h-2 bg-[#1B5E20] rounded-full animate-progress"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="w-full max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+        <h2 className="text-3xl font-bold text-[#1B5E20] mb-8 text-center">Add New Medicine</h2>
 
         {message && (
-          <div className={`p-2 mb-4 rounded ${
-            message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          <div className={`p-4 mb-6 rounded-lg text-center text-lg font-medium ${
+            message.type === 'success' 
+              ? 'bg-green-50 text-[#1B5E20] border-2 border-[#1B5E20]/20' 
+              : 'bg-red-50 text-red-700 border-2 border-red-200'
           }`}>
             {message.text}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold mb-1">Medicine ID</label>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <label className="block text-[#1B5E20] font-semibold text-sm uppercase tracking-wider">Medicine ID</label>
             <input
               type="text"
               name="medicineId"
               value={formData.medicineId}
-              className="p-2 border rounded w-full bg-gray-50"
+              className="w-full p-3 border-2 border-[#1B5E20]/20 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#1B5E20] focus:border-transparent transition-all"
               readOnly
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-1">Batch Number</label>
+          <div className="space-y-2">
+            <label className="block text-[#1B5E20] font-semibold text-sm uppercase tracking-wider">Batch Number</label>
             <input
               type="text"
               name="batchNumber"
               value={formData.batchNumber}
-              className="p-2 border rounded w-full bg-gray-50"
+              className="w-full p-3 border-2 border-[#1B5E20]/20 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#1B5E20] focus:border-transparent transition-all"
               readOnly
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-1">Name</label>
+          <div className="space-y-2">
+            <label className="block text-[#1B5E20] font-semibold text-sm uppercase tracking-wider">Medicine Name</label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className={`p-2 border rounded w-full ${errors.name ? 'border-red-500' : ''}`}
+              className={`w-full p-3 border-2 ${errors.name ? 'border-red-500' : 'border-[#1B5E20]/20'} rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1B5E20] focus:border-transparent transition-all`}
               required
             />
             {errors.name && (
@@ -157,64 +184,64 @@ const AddMedicines = () => {
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-1">Expiry Date</label>
+          <div className="space-y-2">
+            <label className="block text-[#1B5E20] font-semibold text-sm uppercase tracking-wider">Expiry Date</label>
             <input
               type="date"
               name="expiryDate"
               value={formData.expiryDate}
               onChange={handleChange}
-              className="p-2 border rounded w-full"
+              className="w-full p-3 border-2 border-[#1B5E20]/20 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1B5E20] focus:border-transparent transition-all"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-1">Price</label>
+          <div className="space-y-2">
+            <label className="block text-[#1B5E20] font-semibold text-sm uppercase tracking-wider">Unit Price (LKR)</label>
             <input
               type="number"
               name="price"
               value={formData.price}
               onChange={handleChange}
-              className="p-2 border rounded w-full"
+              className="w-full p-3 border-2 border-[#1B5E20]/20 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1B5E20] focus:border-transparent transition-all"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-1">Quantity</label>
+          <div className="space-y-2">
+            <label className="block text-[#1B5E20] font-semibold text-sm uppercase tracking-wider">Stock Quantity</label>
             <input
               type="number"
               name="quantity"
               value={formData.quantity}
               onChange={handleChange}
-              className="p-2 border rounded w-full"
+              className="w-full p-3 border-2 border-[#1B5E20]/20 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1B5E20] focus:border-transparent transition-all"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-1">Last Restocked Date</label>
+          <div className="space-y-2">
+            <label className="block text-[#1B5E20] font-semibold text-sm uppercase tracking-wider">Last Restocked Date</label>
             <input
               type="date"
               name="restockedDate"
               value={formData.restockedDate}
               onChange={handleChange}
-              className="p-2 border rounded w-full"
+              className="w-full p-3 border-2 border-[#1B5E20]/20 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1B5E20] focus:border-transparent transition-all"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-1">Supplier</label>
+          <div className="space-y-2">
+            <label className="block text-[#1B5E20] font-semibold text-sm uppercase tracking-wider">Select Supplier</label>
             <select
               name="supplierId"
               value={formData.supplierId}
               onChange={handleChange}
-              className="p-2 border rounded w-full"
+              className="w-full p-3 border-2 border-[#1B5E20]/20 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1B5E20] focus:border-transparent transition-all"
               required
             >
-              <option value="">Select a Supplier</option>
+              <option value="">Choose a supplier</option>
               {suppliers.map((supplier) => (
                 <option key={supplier.supplierId} value={supplier.supplierId}>
                   {supplier.name} ({supplier.supplierId})
@@ -223,10 +250,10 @@ const AddMedicines = () => {
             </select>
           </div>
 
-          <div className="md:col-span-2">
+          <div className="col-span-2 pt-6">
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600"
+              className="w-full bg-[#1B5E20] text-white py-4 rounded-lg text-lg font-semibold shadow-lg hover:bg-[#1B5E20]/90 transform hover:scale-[1.02] transition-all duration-200"
             >
               Add Medicine
             </button>

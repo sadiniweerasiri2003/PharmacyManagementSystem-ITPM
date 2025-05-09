@@ -54,7 +54,7 @@ const ReportGenerator = ({ medicines }) => {
     <div className="mt-6">
       <button
         onClick={generatePDF}
-        className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600"
+        className="bg-[#0a3833] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#0a3833]/80"
       >
         Generate Full Report
       </button>

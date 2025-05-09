@@ -4,11 +4,7 @@ import InventoryDashboard from "./pages/InventoryDashboard";
 import AddMedicines from "./pages/AddMedicines";
 import UpdateMedicine from "./pages/UpdateMedicine";
 import Login from "./pages/login";
-import SupplierOrder from "./components/SupplierOrder";
-import SupplierOrderList from "./components/SupplierOrderList";
-import PreviousSupplierOrders from "./components/PreviousSupplierOrders";
-import EditSupplierOrder from "./components/EditSupplierOrder";
-import AdminDashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import CashierDashboard from "./pages/CashierDashboard";
 import SupplierDashboard from "./pages/SupplierDashboard";
 import DashboardLayout from "./components/layout/DashboardLayout";
@@ -18,6 +14,10 @@ import { Toaster } from "react-hot-toast";
 import AdminRoute from "./components/AdminRoute";
 import CashierRoute from "./components/CashierRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
+import SupplierOrder from "./components/SupplierOrder";
+import SupplierOrderList from "./components/SupplierOrderList";
+import PreviousSupplierOrders from "./components/PreviousSupplierOrders";
+import EditSupplierOrder from "./components/EditSupplierOrder";
 
 function App() {
   return (
@@ -27,10 +27,23 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          
+          {/* Root path handler - redirects based on auth status */}
+          <Route path="/" element={
+            <ProtectedRoute allowedRoles={['admin', 'cashier']}>
+              <Navigate to="/admin-dashboard" replace />
+            </ProtectedRoute>
+          } />
 
-          {/* Admin Routes */}
+          {/* Overview/Dashboard route */}
           <Route path="/dashboard" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <Navigate to="/admin-dashboard" replace />
+            </ProtectedRoute>
+          } />
+
+          {/* Admin Dashboard - make this the main landing page for admin */}
+          <Route path="/admin-dashboard" element={
             <AdminRoute>
               <DashboardLayout>
                 <AdminDashboard />
@@ -62,6 +75,7 @@ function App() {
             </AdminRoute>
           } />
 
+          {/* Supplier Routes */}
           <Route path="/supplier-dashboard" element={
             <AdminRoute>
               <DashboardLayout>
@@ -70,12 +84,45 @@ function App() {
             </AdminRoute>
           } />
 
-          <Route path="/orders/*" element={
+          <Route path="/orders" element={
             <AdminRoute>
               <DashboardLayout>
                 <SupplierOrderList />
               </DashboardLayout>
             </AdminRoute>
+          } />
+
+          <Route path="/orders/add" element={
+            <AdminRoute>
+              <DashboardLayout>
+                <SupplierOrder fetchOrders={() => {}} />
+              </DashboardLayout>
+            </AdminRoute>
+          } />
+
+          <Route path="/orders/edit/:id" element={
+            <AdminRoute>
+              <DashboardLayout>
+                <EditSupplierOrder />
+              </DashboardLayout>
+            </AdminRoute>
+          } />
+
+          <Route path="/previous-supplier-orders" element={
+            <AdminRoute>
+              <DashboardLayout>
+                <PreviousSupplierOrders />
+              </DashboardLayout>
+            </AdminRoute>
+          } />
+
+          {/* Cashier Routes */}
+          <Route path="/cashier-dashboard" element={
+            <CashierRoute>
+              <DashboardLayout>
+                <CashierDashboard />
+              </DashboardLayout>
+            </CashierRoute>
           } />
 
           {/* Sales Dashboard - Accessible by both admin and cashier */}
@@ -90,7 +137,9 @@ function App() {
           {/* Billing Form - Cashier Only */}
           <Route path="/billing" element={
             <CashierRoute>
-              <BillingForm />
+              <DashboardLayout>
+                <BillingForm />
+              </DashboardLayout>
             </CashierRoute>
           } />
 
