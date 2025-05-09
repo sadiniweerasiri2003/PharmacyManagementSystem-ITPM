@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import { FaInfoCircle, FaCheckCircle, FaBoxOpen } from "react-icons/fa";
 
 const EditSupplierOrder = ({ fetchOrders }) => {
   const { id } = useParams();
@@ -13,8 +14,10 @@ const EditSupplierOrder = ({ fetchOrders }) => {
     orderId: "",
     actualDeliveryDate: "",
   });
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -23,7 +26,6 @@ const EditSupplierOrder = ({ fetchOrders }) => {
         const response = await axios.get(`http://localhost:5001/api/supplierorders/${id}`);
         const order = response.data;
         
-        // Format medicines for display
         const medicinesString = order.medicines.map(med => med.medicineId).join(", ");
         
         setForm({
@@ -47,132 +49,303 @@ const EditSupplierOrder = ({ fetchOrders }) => {
     }
   }, [id]);
 
+  const validateForm = () => {
+    const newErrors = {};
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Supplier ID validation
+    if (!form.supplierId.trim()) {
+      newErrors.supplierId = "Supplier ID is required";
+    } else if (!/^[a-zA-Z0-9-]+$/.test(form.supplierId)) {
+      newErrors.supplierId = "Supplier ID can only contain letters, numbers and hyphens";
+    }
+
+    // Expected Delivery Date validation
+    if (!form.expectedDeliveryDate) {
+      newErrors.expectedDeliveryDate = "Delivery date is required";
+    } else {
+      const deliveryDate = new Date(form.expectedDeliveryDate);
+      deliveryDate.setHours(0, 0, 0, 0);
+      
+      if (deliveryDate <= today) {
+        newErrors.expectedDeliveryDate = "Delivery date must be in the future";
+      }
+    }
+
+    // Medicines validation
+    if (!form.medicines.trim()) {
+      newErrors.medicines = "At least one medicine is required";
+    } else {
+      const medicineArray = form.medicines.split(",").map(m => m.trim());
+      if (medicineArray.some(m => !m)) {
+        newErrors.medicines = "Invalid medicine format (empty values between commas)";
+      }
+    }
+
+    // Actual Delivery Date validation if status is Completed
+    if (form.orderStatus === "Completed" && !form.actualDeliveryDate) {
+      newErrors.actualDeliveryDate = "Actual delivery date is required for completed orders";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: null });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
 
     const formattedMedicines = form.medicines
-      ? form.medicines.split(",").map((med) => ({
-          medicineId: med.trim(),
-          orderedQuantity: 1,
-          receivedQuantity: 0,
-          totalAmount: 100,
-        }))
-      : [];
+      .split(",")
+      .map((med) => med.trim())
+      .filter(med => med)
+      .map((med) => ({
+        medicineId: med,
+        orderedQuantity: 1,
+        receivedQuantity: 0,
+        totalAmount: 100,
+      }));
 
     const requestData = {
       supplierId: form.supplierId,
       expectedDeliveryDate: form.expectedDeliveryDate,
       medicines: formattedMedicines,
       orderStatus: form.orderStatus,
-      actualDeliveryDate: form.orderStatus === "Completed" ? (form.actualDeliveryDate || new Date().toISOString()) : null,
+      actualDeliveryDate: form.orderStatus === "Completed" ? 
+        (form.actualDeliveryDate || new Date().toISOString()) : 
+        null,
     };
 
     try {
       setLoading(true);
       await axios.put(`http://localhost:5001/api/supplierorders/${form.orderId}`, requestData);
-      navigate("/orders");
-      if (fetchOrders) fetchOrders();
+      setIsSubmitted(true);
+      
+      setTimeout(() => {
+        navigate("/orders");
+        if (fetchOrders) fetchOrders();
+        setIsSubmitted(false);
+      }, 1500);
     } catch (err) {
-      setError("Error updating order.");
+      setError(err.response?.data?.message || "Error updating order. Please try again.");
       console.error("API Error:", err.response ? err.response.data : err.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const getMinDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Edit Supplier Order</h1>
-
-      {error && <p className="text-red-500 text-center">{error}</p>}
-      {loading && <p className="text-center text-gray-500">Loading order data...</p>}
-
-      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-gray-700 mb-2">Order ID</label>
-            <input
-              type="text"
-              name="orderId"
-              value={form.orderId}
-              readOnly
-              className="border border-gray-300 p-3 rounded-lg w-full bg-gray-100"
-            />
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white shadow-xl rounded-lg overflow-hidden border border-gray-200">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4">
+            <h1 className="text-2xl font-bold text-white">
+              Edit Supplier Order
+            </h1>
+            <p className="text-blue-100 mt-1">
+              Update order details and status
+            </p>
           </div>
-          <div>
-            <label className="block text-gray-700 mb-2">Supplier ID</label>
-            <input
-              type="text"
-              name="supplierId"
-              value={form.supplierId}
-              onChange={handleChange}
-              className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+
+          <div className="p-6 sm:p-8">
+            {isSubmitted && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center">
+                <FaCheckCircle className="text-green-500 mr-3" size={20} />
+                <div>
+                  <h3 className="font-medium text-green-800">Order updated successfully!</h3>
+                  <p className="text-sm text-green-600 mt-1">Redirecting to orders page...</p>
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
+                <FaInfoCircle className="text-red-500 mr-3 mt-0.5" size={18} />
+                <div>
+                  <h3 className="font-medium text-red-800">Error updating order</h3>
+                  <p className="text-sm text-red-600 mt-1">{error}</p>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Order ID (readonly) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Order ID
+                  </label>
+                  <input
+                    type="text"
+                    name="orderId"
+                    value={form.orderId}
+                    readOnly
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-gray-100"
+                  />
+                </div>
+
+                {/* Supplier ID */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Supplier ID <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="supplierId"
+                      placeholder="SP-1001"
+                      value={form.supplierId}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-3 border ${errors.supplierId ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md shadow-sm`}
+                      required
+                    />
+                    {errors.supplierId && (
+                      <p className="mt-1 text-sm text-red-600 flex items-center">
+                        <FaInfoCircle className="mr-1" size={12} />
+                        {errors.supplierId}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Expected Delivery Date */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Expected Delivery Date <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="date"
+                    name="expectedDeliveryDate"
+                    value={form.expectedDeliveryDate}
+                    onChange={handleChange}
+                    min={getMinDate()}
+                    className={`w-full px-4 py-3 border ${errors.expectedDeliveryDate ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md shadow-sm`}
+                    required
+                  />
+                  {errors.expectedDeliveryDate && (
+                    <p className="mt-1 text-sm text-red-600 flex items-center">
+                      <FaInfoCircle className="mr-1" size={12} />
+                      {errors.expectedDeliveryDate}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Medicines Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Medicines <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <textarea
+                    name="medicines"
+                    placeholder="MED001, MED002, MED003"
+                    value={form.medicines}
+                    onChange={handleChange}
+                    rows="3"
+                    className={`w-full px-4 py-3 border ${errors.medicines ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md shadow-sm resize-none`}
+                  ></textarea>
+                  {errors.medicines ? (
+                    <p className="mt-1 text-sm text-red-600 flex items-center">
+                      <FaInfoCircle className="mr-1" size={12} />
+                      {errors.medicines}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm text-gray-500">
+                      Enter medicine IDs separated by commas (e.g., MED001, MED002)
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Order Status */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Order Status <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="orderStatus"
+                  value={form.orderStatus}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Cancelled">Cancelled</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+
+              {/* Actual Delivery Date (conditionally shown) */}
+              {form.orderStatus === "Completed" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Actual Delivery Date <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      name="actualDeliveryDate"
+                      value={form.actualDeliveryDate}
+                      onChange={handleChange}
+                      max={new Date().toISOString().split('T')[0]}
+                      className={`w-full px-4 py-3 border ${errors.actualDeliveryDate ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md shadow-sm`}
+                    />
+                    {errors.actualDeliveryDate && (
+                      <p className="mt-1 text-sm text-red-600 flex items-center">
+                        <FaInfoCircle className="mr-1" size={12} />
+                        {errors.actualDeliveryDate}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed transition-colors duration-200"
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Updating...
+                    </>
+                  ) : (
+                    "Update Order"
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-
-        <div className="mt-4">
-          <label className="block text-gray-700 mb-2">Expected Delivery Date</label>
-          <input
-            type="date"
-            name="expectedDeliveryDate"
-            value={form.expectedDeliveryDate}
-            onChange={handleChange}
-            className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-
-        <div className="mt-4">
-          <label className="block text-gray-700 mb-2">Medicines (comma separated)</label>
-          <input
-            type="text"
-            name="medicines"
-            placeholder="Medicine1, Medicine2, Medicine3"
-            value={form.medicines}
-            onChange={handleChange}
-            className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div className="mt-4">
-          <label className="block text-gray-700 mb-2">Order Status</label>
-          <select
-            name="orderStatus"
-            value={form.orderStatus}
-            onChange={handleChange}
-            className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="Pending">Pending</option>
-            <option value="Cancelled">Cancelled</option>
-            <option value="Completed">Completed</option>
-          </select>
-        </div>
-
-        {form.orderStatus === "Completed" && (
-          <div className="mt-4">
-            <label className="block text-gray-700 mb-2">Actual Delivery Date</label>
-            <input
-              type="date"
-              name="actualDeliveryDate"
-              value={form.actualDeliveryDate}
-              onChange={handleChange}
-              className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        )}
-
-        <button
-          type="submit"
-          className="mt-6 w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
-        >
-          Update Order
-        </button>
-      </form>
+      </div>
     </div>
   );
 };
