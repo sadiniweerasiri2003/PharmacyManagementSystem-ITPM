@@ -14,6 +14,7 @@ const salesRoutes = require("./routes/salesRoutes");
 const medicineRoutes = require("./routes/medicineRoutes");
 const medicineNameFetchRoutes = require("./routes/medicineNameFetch");
 const predictionRoutes = require('./routes/predictionRoutes');
+const salesReportRoutes = require('./routes/salesReportRoutes');
 
 // Initialize express and load environment variables
 dotenv.config();
@@ -54,12 +55,13 @@ initializeMongoClient();
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use("/api/suppliers", supplierRoutes);
-app.use("/api/supplierorders", supplierOrderRoutes);
-app.use("/api/sales", salesRoutes);
-app.use("/api/medicines", medicineRoutes);
-app.use("/api/medicineNames", medicineNameFetchRoutes);
+app.use('/api/suppliers', supplierRoutes);
+app.use('/api/supplier-orders', supplierOrderRoutes);
+app.use('/api/sales', salesRoutes);
+app.use('/api/medicines', medicineRoutes);
+app.use('/api/medicine-names', medicineNameFetchRoutes);
 app.use('/api/predictions', predictionRoutes);
+app.use('/api/sales-report', salesReportRoutes);
 
 // Start the server
 const port = process.env.PORT || 5001;

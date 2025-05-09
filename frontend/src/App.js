@@ -14,7 +14,6 @@ import { Toaster } from "react-hot-toast";
 import AdminRoute from "./components/AdminRoute";
 import CashierRoute from "./components/CashierRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
-<<<<<<< Updated upstream
 import SupplierOrder from "./components/SupplierOrder";
 import SupplierOrderList from "./components/SupplierOrderList";
 import PreviousSupplierOrders from "./components/PreviousSupplierOrders";
@@ -22,9 +21,7 @@ import EditSupplierOrder from "./components/EditSupplierOrder";
 import PredictionsTable from "./components/PredictionsTable";
 import RestockAlert from "./components/RestockAlert";
 import AllRestockAlerts from "./pages/AllRestockAlerts";
-=======
-import SalesReportPage from './pages/SalesReportPage';
->>>>>>> Stashed changes
+import AnnualSalesReport from './pages/AnnualSalesReport';
 
 function App() {
   return (
@@ -150,7 +147,6 @@ function App() {
             </CashierRoute>
           } />
 
-<<<<<<< Updated upstream
           {/* Add Predictions Routes */}
           <Route path="/predictions" element={
             <AdminRoute>
@@ -167,9 +163,14 @@ function App() {
               </DashboardLayout>
             </AdminRoute>
           } />
-=======
-          <Route path="/sales-report" element={<SalesReportPage />} />
->>>>>>> Stashed changes
+
+          <Route path="/sales-report" element={
+            <ProtectedRoute allowedRoles={['admin', 'cashier']}>
+              <DashboardLayout>
+                <AnnualSalesReport />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
 
           {/* Catch all unauthorized routes */}
           <Route path="*" element={<Navigate to="/login" replace />} />

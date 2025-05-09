@@ -8,11 +8,8 @@ import {
   UsersIcon,
   BarChart3Icon,  // Changed from ChartBarIcon
   ClipboardListIcon,
-<<<<<<< Updated upstream
-  BrainCircuitIcon, // Add this import for predictions icon
-=======
-  FileTextIcon,  // Add this import
->>>>>>> Stashed changes
+  BrainCircuitIcon, // For predictions icon
+  FileTextIcon,  // For sales report
 } from 'lucide-react'
 
 const NavItem = ({ icon, label, onClick }) => {
@@ -64,6 +61,11 @@ const Sidebar = () => {
                 icon={<BarChart3Icon size={20} />}  // Changed from ChartBarIcon
                 label="Sales History" 
                 onClick={() => navigate('/sales')}
+              />
+              <NavItem 
+                icon={<FileTextIcon size={20} />}
+                label="Sales Report" 
+                onClick={() => navigate('/sales-report')}
               />
               <NavItem 
                 icon={<BrainCircuitIcon size={20} />} 
