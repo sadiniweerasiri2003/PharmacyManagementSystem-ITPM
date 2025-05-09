@@ -6,7 +6,7 @@ import UpdateMedicine from "./pages/UpdateMedicine";
 import Login from "./pages/login";
 import SupplierOrder from "./components/SupplierOrder";
 import SupplierOrderList from "./components/SupplierOrderList";
-import PreviousSupplierOrders from "./components/PreviousSupplierOrders";
+
 import EditSupplierOrder from "./components/EditSupplierOrder";
 import AdminDashboard from "./pages/AdminDashboard";
 import CashierDashboard from "./pages/CashierDashboard";
@@ -34,7 +34,7 @@ function App() {
           <Route path="/orders" element={<SupplierOrderList />} />
           <Route path="/orders/add" element={<SupplierOrder />} />
           <Route path="/orders/edit/:id" element={<EditSupplierOrder />} />
-          <Route path="/previous-supplier-orders" element={<PreviousSupplierOrders />} />
+          
 
           {/* Inventory Management Routes */}
           <Route path="/inventory-dashboard" element={<InventoryDashboard />} />
