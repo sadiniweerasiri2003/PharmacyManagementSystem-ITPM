@@ -8,6 +8,7 @@ import {
   AlertTriangleIcon,
   TrendingUpIcon,
   ChevronDownIcon,
+  Loader2Icon,
 } from 'lucide-react';
 import MetricCard from '../components/dashboard/MetricCard';
 import OrdersTable from '../components/dashboard/OrdersTable';
@@ -23,11 +24,23 @@ const AdminDashboard = () => {
     lowStockCount: 0,
     todaySales: 0
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastFetched, setLastFetched] = useState(null);
+
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
   useEffect(() => {
     const fetchMetrics = async () => {
+      // Check if cache is still valid
+      if (lastFetched && Date.now() - lastFetched < CACHE_DURATION) {
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
       try {
-        // Fetch all required data
         const [medicinesRes, suppliersRes, salesRes, todaySalesRes] = await Promise.all([
           axios.get('http://localhost:5001/api/medicines'),
           axios.get('http://localhost:5001/api/suppliers'),
@@ -59,16 +72,27 @@ const AdminDashboard = () => {
           todaySales: todaySalesAmount
         });
 
+        setLastFetched(Date.now());
       } catch (error) {
         console.error('Error fetching metrics:', error);
+        setError('Failed to fetch dashboard data');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchMetrics();
-    // Refresh data every 5 minutes
-    const interval = setInterval(fetchMetrics, 300000);
+    const interval = setInterval(fetchMetrics, CACHE_DURATION);
     return () => clearInterval(interval);
-  }, []);
+  }, [lastFetched]);
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen text-red-500">
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -76,7 +100,7 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <MetricCard
           title="Total Medicines"
-          value={metrics.totalMedicines}
+          value={loading ? <Loader2Icon className="animate-spin" /> : metrics.totalMedicines}
           icon={<PackageIcon />}
           iconBgColor="bg-[#CCFF33]"
           iconColor="text-[#0a3833]"
@@ -84,7 +108,7 @@ const AdminDashboard = () => {
         />
         <MetricCard
           title="Total Suppliers"
-          value={metrics.totalSuppliers}
+          value={loading ? <Loader2Icon className="animate-spin" /> : metrics.totalSuppliers}
           icon={<UsersIcon />}
           iconBgColor="bg-[#CCFF33]"
           iconColor="text-[#0a3833]"
@@ -92,7 +116,7 @@ const AdminDashboard = () => {
         />
         <MetricCard
           title="Total Sales"
-          value={`$${metrics.totalSales.toFixed(2)}`}
+          value={loading ? <Loader2Icon className="animate-spin" /> : `$${metrics.totalSales.toFixed(2)}`}
           icon={<DollarSignIcon />}
           iconBgColor="bg-[#CCFF33]"
           iconColor="text-[#0a3833]"
