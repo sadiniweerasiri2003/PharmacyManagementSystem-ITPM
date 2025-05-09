@@ -45,32 +45,22 @@ const RestockAlert = ({ limit = 5 }) => {
     const displayedItems = limit ? urgentRestocks.slice(0, limit) : urgentRestocks;
 
     return (
-        <div className="max-w-2xl mx-auto px-2 py-4"> {/* Reduced from max-w-4xl and padding */}
+        <div className="w-full"> {/* Changed from max-w-2xl mx-auto px-2 py-4 */}
             <div className="bg-white rounded-xl shadow-xl overflow-hidden">
-                <div className="bg-gradient-to-r from-red-600 to-red-700 p-3"> {/* Reduced padding */}
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2"> {/* Reduced gap */}
-                            <span className="p-1.5 bg-red-100 rounded-full text-sm">⚠️</span> {/* Smaller emoji container */}
-                            <h3 className="text-base font-bold text-white">Critical Stock Alert</h3> {/* Smaller text */}
-                        </div>
-                        <div className="flex gap-2">
-                            {limit && urgentRestocks.length > limit && (
-                                <button
-                                    onClick={() => navigate('/all-alerts')}
-                                    className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded text-xs transition-colors" /* Smaller button */
-                                >
-                                    View All ({urgentRestocks.length})
-                                </button>
-                            )}
+                <div className="bg-[#0a3833] p-3">
+                    <div className="flex items-center">
+                        <div className="flex items-center gap-2">
+                            <span className="p-1.5 bg-[#CCFF33] rounded-full text-sm">🔮</span>
+                            <h3 className="text-base font-bold text-white">Predictive Stock Alert</h3>
                         </div>
                     </div>
                 </div>
                 <div className="divide-y divide-gray-200">
                     {displayedItems.map((item, index) => (
-                        <div key={index} className="p-3 hover:bg-gray-50 transition-colors"> {/* Reduced padding */}
-                            <div className="flex justify-between items-start">
+                        <div key={index} className="p-3 hover:bg-gray-50 transition-colors">
+                            <div className="flex justify-between items-start mb-3">
                                 <div>
-                                    <h4 className="font-semibold text-gray-900 text-sm mb-1">
+                                    <h4 className="font-semibold text-[#0a3833] text-sm mb-1">
                                         {item.medicine_name}
                                     </h4>
                                     <p className="text-xs text-gray-500 mb-1">
@@ -81,22 +71,47 @@ const RestockAlert = ({ limit = 5 }) => {
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                                        {item.days_until_restock}d left
-                                    </span>
                                     <button
                                         onClick={() => navigate(`/reorder/${item.medicine_id}`)}
-                                        className="mt-1 block px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs transition-colors"
+                                        className={`mt-1 block px-3 py-1 rounded text-xs transition-all duration-300 ${
+                                            item.days_until_restock === 0 
+                                            ? 'bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg hover:shadow-xl scale-105 hover:scale-110 animate-pulse'
+                                            : 'bg-[#0a3833] hover:bg-[#0a3833]/80 text-white'
+                                        }`}
                                     >
-                                        Reorder
+                                        {item.days_until_restock === 0 ? 'REORDER NOW!' : 'Reorder'}
                                     </button>
                                 </div>
                             </div>
-                            <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
-                                <div
-                                    className="bg-red-600 h-1 rounded-full"
-                                    style={{ width: `${(item.days_until_restock / 7) * 100}%` }}
-                                />
+                            <div className="space-y-1">
+                                <div className="flex justify-between items-center">
+                                    <span className={`text-xs ${
+                                        item.days_until_restock === 0 
+                                        ? 'text-red-600 font-bold'
+                                        : 'text-[#0a3833]'
+                                    }`}>
+                                        {item.days_until_restock} days left until restock needed
+                                    </span>
+                                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                                        item.days_until_restock === 0 
+                                        ? 'bg-red-200 text-red-900' 
+                                        : item.days_until_restock <= 2
+                                        ? 'bg-[#CCFF33] text-[#0a3833]'
+                                        : 'bg-[#CCFF33]/50 text-[#0a3833]'
+                                    }`}>
+                                        {item.days_until_restock}d
+                                    </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1">
+                                    <div
+                                        className={`${
+                                            item.days_until_restock === 0 
+                                            ? 'bg-red-600 animate-pulse' 
+                                            : 'bg-[#0a3833]'
+                                        } h-1 rounded-full`}
+                                        style={{ width: `${(item.days_until_restock / 7) * 100}%` }}
+                                    />
+                                </div>
                             </div>
                         </div>
                     ))}

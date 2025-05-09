@@ -26,3 +26,8 @@ export const updateSale = async (orderid, updatedData) => {
 export const deleteSale = async (orderid) => {
     return await axios.delete(`${API_URL}/${orderid}`);
 };
+
+// Get top selling medicines
+export const getTopSellingMedicines = async () => {
+    return await axios.get(`${API_URL}/top-selling`);
+};

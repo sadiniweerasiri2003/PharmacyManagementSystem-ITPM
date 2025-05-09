@@ -3,6 +3,17 @@ const router = express.Router();
 const Sales = require("../models/Sales");
 const Medicine = require("../models/Medicine");
 
+// Get all sales
+router.get("/", async (req, res) => {
+    try {
+        const sales = await Sales.find();
+        res.status(200).json(sales);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error, could not fetch sales" });
+    }
+});
+
 // Create a new sale with multiple medicines
 router.post("/", async (req, res) => {
     try {
@@ -109,6 +120,45 @@ router.put("/update-medicines/:invoiceId", async (req, res) => {
     }
 });
 
+// Get top selling medicines
+router.get("/top-selling", async (req, res) => {
+    try {
+        const topMedicines = await Sales.aggregate([
+            // Unwind the medicines array to treat each medicine as a separate document
+            { $unwind: "$medicines" },
+            // Group by medicine ID and name, sum up quantities
+            {
+                $group: {
+                    _id: {
+                        medicineId: "$medicines.medicineId",
+                        name: "$medicines.name"
+                    },
+                    totalQuantity: { $sum: "$medicines.qty_sold" },
+                    totalRevenue: { $sum: "$medicines.totalprice" }
+                }
+            },
+            // Sort by total quantity in descending order
+            { $sort: { totalQuantity: -1 } },
+            // Limit to top 3
+            { $limit: 3 },
+            // Project the final format
+            {
+                $project: {
+                    _id: 0,
+                    medicineId: "$_id.medicineId",
+                    name: "$_id.name",
+                    totalQuantity: 1,
+                    totalRevenue: 1
+                }
+            }
+        ]);
+
+        res.status(200).json(topMedicines);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error, could not fetch top selling medicines" });
+    }
+});
 
 // Delete a sale by invoiceId
 router.delete("/:invoiceId", async (req, res) => {

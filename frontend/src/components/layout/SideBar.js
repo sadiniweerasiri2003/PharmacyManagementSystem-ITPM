@@ -7,7 +7,8 @@ import {
   TrendingUpIcon,
   UsersIcon,
   BarChart3Icon,  // Changed from ChartBarIcon
-  ClipboardListIcon
+  ClipboardListIcon,
+  BrainCircuitIcon, // Add this import for predictions icon
 } from 'lucide-react'
 
 const NavItem = ({ icon, label, onClick }) => {
@@ -59,6 +60,11 @@ const Sidebar = () => {
                 icon={<BarChart3Icon size={20} />}  // Changed from ChartBarIcon
                 label="Sales History" 
                 onClick={() => navigate('/sales')}
+              />
+              <NavItem 
+                icon={<BrainCircuitIcon size={20} />} 
+                label="Predictive Assistant" 
+                onClick={() => navigate('/predictions')}
               />
             </>
           ) : (
