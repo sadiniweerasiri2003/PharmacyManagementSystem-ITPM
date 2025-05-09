@@ -22,7 +22,6 @@ const userSchema = new mongoose.Schema({
     unique: true,
   },
 });
-
 // Static method to generate a cashier ID
 userSchema.statics.generateCashierId = async function () {
   const count = await this.countDocuments({ role: 'cashier' });

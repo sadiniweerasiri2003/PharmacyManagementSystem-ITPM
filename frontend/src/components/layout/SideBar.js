@@ -1,24 +1,30 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 import {
   LayoutGridIcon,
   PackageIcon,
   ShoppingCartIcon,
   TrendingUpIcon,
   UsersIcon,
-  CreditCardIcon,
-  LifeBuoyIcon,
-  SettingsIcon,
-  LockIcon
+  BarChart3Icon,  // Changed from ChartBarIcon
+  ClipboardListIcon,
+  BrainCircuitIcon, // For predictions icon
+  FileTextIcon,  // For sales report
 } from 'lucide-react'
-const NavItem = ({ icon, label }) => {
+
+const NavItem = ({ icon, label, onClick }) => {
   return (
-    <div className="flex items-center py-3 px-2 text-gray-300 hover:text-white cursor-pointer">
+    <div className="flex items-center py-3 px-2 text-gray-300 hover:text-white cursor-pointer" onClick={onClick}>
       <div className="mr-3">{icon}</div>
       <span>{label}</span>
     </div>
   )
 }
+
 const Sidebar = () => {
+  const navigate = useNavigate();
+  const userRole = localStorage.getItem('role');
+
   return (
     <div className="w-[220px] bg-[#0a3833] text-white flex flex-col h-full">
       <div className="p-4 flex items-center border-b border-[#164e47]">
@@ -29,14 +35,67 @@ const Sidebar = () => {
       </div>
       <div className="flex-1 py-4">
         <div className="px-4 mb-6">
-        <NavItem icon={<PackageIcon size={20} />} label="Overview" />
-          <NavItem icon={<PackageIcon size={20} />} label="Medicines" />
-          <NavItem icon={<ShoppingCartIcon size={20} />} label="Sales" />
-          <NavItem icon={<TrendingUpIcon size={20} />} label="Suppliers" />
-          <NavItem icon={<UsersIcon size={20} />} label="SupplierOrders" />
+          {userRole === 'admin' ? (
+            <>
+              <NavItem 
+                icon={<LayoutGridIcon size={20} />} 
+                label="Overview" 
+                onClick={() => navigate('/dashboard')}
+              />
+              <NavItem 
+                icon={<PackageIcon size={20} />} 
+                label="Medicines" 
+                onClick={() => navigate('/inventory-dashboard')}
+              />
+              <NavItem 
+                icon={<UsersIcon size={20} />} 
+                label="Suppliers" 
+                onClick={() => navigate('/supplier-dashboard')}
+              />
+              <NavItem 
+                icon={<ClipboardListIcon size={20} />} 
+                label="Supplier Orders" 
+                onClick={() => navigate('/orders')}
+              />
+              <NavItem 
+                icon={<BarChart3Icon size={20} />}  // Changed from ChartBarIcon
+                label="Sales History" 
+                onClick={() => navigate('/sales')}
+              />
+              <NavItem 
+                icon={<FileTextIcon size={20} />}
+                label="Sales Report" 
+                onClick={() => navigate('/sales-report')}
+              />
+              <NavItem 
+                icon={<BrainCircuitIcon size={20} />} 
+                label="Predictive Assistant" 
+                onClick={() => navigate('/predictions')}
+              />
+            </>
+          ) : (
+            <>
+              <NavItem 
+                icon={<ShoppingCartIcon size={20} />} 
+                label="Billing" 
+                onClick={() => navigate('/billing')}
+              />
+              <NavItem 
+                icon={<BarChart3Icon size={20} />}  // Changed from ChartBarIcon
+                label="Sales History" 
+                onClick={() => navigate('/sales')}
+              />
+              <NavItem 
+                icon={<FileTextIcon size={20} />}
+                label="Sales Report" 
+                onClick={() => navigate('/sales-report')}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
+
 export default Sidebar;

@@ -11,22 +11,39 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch("http://localhost:5001/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const response = await fetch("http://localhost:5001/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    const data = await response.json();
-    if (response.ok) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
+      const data = await response.json();
 
-      if (data.role === "admin") navigate("/dashboard");
-      else if (data.role === "cashier") navigate("/cashier-dashboard");
-      else if (data.role === "supplier") navigate("/supplier-dashboard");
-    } else {
-      alert("Invalid credentials");
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role);
+        localStorage.setItem("userEmail", formData.email);
+        
+        if (data.role === "cashier") {
+          if (data.cashierId) {
+            localStorage.setItem("cashierId", data.cashierId);
+            navigate("/billing");
+          } else {
+            alert("Cashier ID not found");
+          }
+        } else if (data.role === "admin") {
+          navigate("/dashboard");
+        } else {
+          alert("Invalid role");
+          localStorage.clear();
+        }
+      } else {
+        alert(data.message || "Invalid credentials");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Login failed. Please check your network connection.");
     }
   };
 
