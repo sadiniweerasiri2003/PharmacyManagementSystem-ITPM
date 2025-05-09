@@ -90,16 +90,32 @@ for med_id in medicine_data["medicineId"]:
     if not med_sales.empty:
         # Prepare data for Prophet
         med_sales = med_sales[["ds", "y"]]
-        med_sales["ds"] = pd.to_datetime(med_sales["ds"]).dt.tz_localize(None)
+        # Convert dates with explicit format
+        try:
+            # First try ISO format
+            med_sales["ds"] = pd.to_datetime(med_sales["ds"], format='%Y-%m-%dT%H:%M:%S.%fZ')
+        except ValueError:
+            try:
+                # Fallback to simple date format
+                med_sales["ds"] = pd.to_datetime(med_sales["ds"], format='%Y-%m-%d')
+            except ValueError:
+                # Last resort - let pandas infer format but with error handling
+                med_sales["ds"] = pd.to_datetime(med_sales["ds"], errors='coerce')
+                # Remove any rows where date parsing failed
+                med_sales = med_sales.dropna(subset=['ds'])
         
-        # Train model for this medicine
-        med_model = Prophet(seasonality_mode="multiplicative", changepoint_prior_scale=0.05)
-        med_model.fit(med_sales)
+        # Remove timezone information consistently
+        med_sales["ds"] = med_sales["ds"].dt.tz_localize(None)
         
-        # Predict next 30 days
-        med_future = med_model.make_future_dataframe(periods=30)
-        med_forecast = med_model.predict(med_future)
-        medicine_forecasts[med_id] = med_forecast
+        if not med_sales.empty:
+            # Train model for this medicine
+            med_model = Prophet(seasonality_mode="multiplicative", changepoint_prior_scale=0.05)
+            med_model.fit(med_sales)
+            
+            # Predict next 30 days
+            med_future = med_model.make_future_dataframe(periods=30)
+            med_forecast = med_model.predict(med_future)
+            medicine_forecasts[med_id] = med_forecast
 
 # Dictionary to store stock depletion predictions and restocking needs
 stock_depletion_dates = {}

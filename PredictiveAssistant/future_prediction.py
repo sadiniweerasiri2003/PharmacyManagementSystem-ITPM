@@ -95,6 +95,11 @@ def predict_restock(medicines_data):
             # Calculate final order quantity
             total_monthly_need = int(monthly_prediction + peak_adjustment + safety_stock)
             
+            # Calculate forecast confidence as percentage
+            mean_forecast = forecast.tail(30)['yhat'].mean()
+            upper_bound = forecast.tail(30)['yhat_upper'].mean()
+            forecast_confidence = ((upper_bound - mean_forecast) / mean_forecast) * 100
+
             predictions.append({
                 'medicine_id': medicine_id,
                 'current_stock': current_stock,
@@ -105,7 +110,7 @@ def predict_restock(medicines_data):
                 'prediction_timestamp': datetime.now(),
                 'peak_adjusted': True,
                 'includes_safety_stock': True,
-                'forecast_confidence': forecast.tail(30)['yhat_upper'].mean() - forecast.tail(30)['yhat'].mean()
+                'forecast_confidence': round(forecast_confidence, 2)  # Now shows percentage
             })
 
     return predictions
