@@ -18,6 +18,9 @@ import SupplierOrder from "./components/SupplierOrder";
 import SupplierOrderList from "./components/SupplierOrderList";
 import PreviousSupplierOrders from "./components/PreviousSupplierOrders";
 import EditSupplierOrder from "./components/EditSupplierOrder";
+import PredictionsTable from "./components/PredictionsTable";
+import RestockAlert from "./components/RestockAlert";
+import AllRestockAlerts from "./pages/AllRestockAlerts";
 
 function App() {
   return (
@@ -141,6 +144,23 @@ function App() {
                 <BillingForm />
               </DashboardLayout>
             </CashierRoute>
+          } />
+
+          {/* Add Predictions Routes */}
+          <Route path="/predictions" element={
+            <AdminRoute>
+              <DashboardLayout>
+                <PredictionsTable />
+              </DashboardLayout>
+            </AdminRoute>
+          } />
+
+          <Route path="/all-alerts" element={
+            <AdminRoute>
+              <DashboardLayout>
+                <AllRestockAlerts />
+              </DashboardLayout>
+            </AdminRoute>
           } />
 
           {/* Catch all unauthorized routes */}
