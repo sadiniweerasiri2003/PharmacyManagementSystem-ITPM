@@ -23,7 +23,7 @@ const BillingForm = () => {
   useEffect(() => {
     const fetchMedicines = async () => {
       try {
-        const response = await fetch("http://localhost:5001/api/medicineNames/getallnames");
+        const response = await fetch("http://localhost:5001/api/medicine-names/getallnames");
         const data = await response.json();
         setAvailableMedicines(data);
       } catch (error) {
@@ -44,9 +44,8 @@ const BillingForm = () => {
   const handleMedicineSelect = async (selectedName) => {
     if (!selectedName) return;
   
-    try {
-      const response = await fetch(`http://localhost:5001/api/medicineNames/getauto?name=${encodeURIComponent(selectedName)}`);
-  
+    try {      const response = await fetch(`http://localhost:5001/api/medicine-names/getauto?name=${encodeURIComponent(selectedName)}`);
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -168,7 +167,7 @@ const BillingForm = () => {
                 />
                 <datalist id="medicineList">
                   {availableMedicines.map((med) => (
-                    <option key={med._id} value={med.name} />
+                    <option key={med._id} value={med.name} data-id={med._id} />
                   ))}
                 </datalist>
 
@@ -241,17 +240,24 @@ const BillingForm = () => {
           <ul className="list-disc pl-5">
             {medicines.map((med, index) => (
               <li key={index} className="text-gray-700">
-                {med.name} - {med.qty_sold} x {med.unitprice} = {med.totalprice}
+                {med.name} - {med.qty_sold} x ${med.unitprice.toFixed(2)} = ${med.totalprice.toFixed(2)}
               </li>
             ))}
           </ul>
 
-          <p className="text-lg font-semibold">Subtotal: {calculateTotalPrice()}</p>
+          {medicines.length > 0 && (
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg border-2 border-[#1B5E20]/20">
+              <div className="flex justify-between items-center text-lg">
+                <span className="font-semibold">Items Total:</span>
+                <span className="font-bold text-[#1B5E20]">${calculateTotalPrice().toFixed(2)}</span>
+              </div>
+            </div>
+          )}
 
           {medicines.length > 0 && !isCheckout && (
             <button
               type="button"
-              className="w-full bg-purple-500 text-white py-2 rounded"
+              className="w-full bg-[#1B5E20] text-white py-3 rounded-lg hover:bg-[#1B5E20]/90 transition-all duration-200 mt-4"
               onClick={() => setIsCheckout(true)}
             >
               Checkout

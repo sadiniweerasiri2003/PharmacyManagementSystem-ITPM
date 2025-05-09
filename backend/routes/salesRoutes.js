@@ -120,6 +120,41 @@ router.put("/update-medicines/:invoiceId", async (req, res) => {
     }
 });
 
+// Update sale by removing a medicine
+router.put("/:invoiceId/removeMedicine", async (req, res) => {
+  try {
+    const { medicineId } = req.body;
+    const sale = await Sales.findOne({ invoiceId: req.params.invoiceId });
+    
+    if (!sale) {
+      return res.status(404).json({ message: "Sale not found" });
+    }
+
+    // Check if the sale has more than one medicine
+    if (sale.medicines.length <= 1) {
+      return res.status(400).json({ message: "Cannot remove medicine from sale with only one item" });
+    }
+
+    // Find and remove the specified medicine
+    const medicineIndex = sale.medicines.findIndex(med => med._id.toString() === medicineId);
+    
+    if (medicineIndex === -1) {
+      return res.status(404).json({ message: "Medicine not found in this sale" });
+    }
+
+    // Remove the medicine
+    sale.medicines.splice(medicineIndex, 1);
+    
+    // Save the updated sale
+    const updatedSale = await sale.save();
+    
+    res.status(200).json(updatedSale);
+  } catch (error) {
+    console.error("Error updating sale:", error);
+    res.status(500).json({ message: "Server error while updating sale" });
+  }
+});
+
 // Get top selling medicines
 router.get("/top-selling", async (req, res) => {
     try {

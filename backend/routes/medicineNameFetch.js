@@ -32,23 +32,18 @@ router.get("/getauto", async (req, res) => {
     res.status(500).json({ message: "Server error, could not fetch medicine details" });
   }
 });
+
 // Route to get all medicine names
 router.get("/getallnames", async (req, res) => {
-    try {
-      // Fetch all medicines and extract only the 'name' field
-      const medicines = await Medicine.find({}, "name");
-  
-      if (medicines.length === 0) {
-        return res.status(404).json({ message: "No medicines found in the database" });
-      }
-  
-      // Return all medicine names
-      res.status(200).json(medicines);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error, could not fetch medicine names" });
-    }
-  });
+  try {
+    // Find all medicines and select both id and name fields
+    const medicines = await Medicine.find({}, '_id name');
+    // Return array of objects with id and name
+    res.status(200).json(medicines);
+  } catch (error) {
+    console.error("Error fetching medicine names:", error);
+    res.status(500).json({ message: "Error fetching medicine names" });
+  }
+});
 
-  
 module.exports = router;

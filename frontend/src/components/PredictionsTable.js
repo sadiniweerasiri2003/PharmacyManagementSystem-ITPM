@@ -29,7 +29,7 @@ const PredictionsTable = () => {
     if (loading) {
         return (
             <div className="flex justify-center items-center min-h-screen">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#1B5E20]"></div>
             </div>
         );
     }
@@ -49,13 +49,13 @@ const PredictionsTable = () => {
             <h2 className="text-3xl font-bold text-gray-800 mb-6">Medicine Stock Predictions</h2>
             <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
                 <table className="min-w-full">
-                    <thead className="bg-gradient-to-r from-blue-600 to-blue-800">
+                    <thead className="bg-[#0a3833]">
                         <tr>
                             <th className="px-6 py-3 text-left text-sm font-semibold text-white">Medicine ID</th>
                             <th className="px-6 py-3 text-left text-sm font-semibold text-white">Current Stock</th>
                             <th className="px-6 py-3 text-left text-sm font-semibold text-white">Daily Sales Avg</th>
-                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Days Until Restock</th>
-                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Restock Date</th>
+                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Days Until Depletion</th>
+                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Stock Depletion Date</th>
                             <th className="px-6 py-3 text-left text-sm font-semibold text-white">Reorder Quantity</th>
                             <th className="px-6 py-3 text-left text-sm font-semibold text-white">Confidence</th>
                         </tr>
@@ -69,11 +69,11 @@ const PredictionsTable = () => {
                                 <td className="px-6 py-4">
                                     <div className="flex items-center">
                                         <div className={`h-2.5 rounded-full w-full max-w-[100px] ${
-                                            pred.days_until_restock <= 7 ? 'bg-red-500' :
-                                            pred.days_until_restock <= 14 ? 'bg-yellow-500' : 'bg-green-500'
+                                            pred.days_until_restock <= 7 ? 'bg-red-600' :
+                                            pred.days_until_restock <= 14 ? 'bg-[#CCFF33]' : 'bg-[#1B5E20]'
                                         }`}>
                                         </div>
-                                        <span className="ml-2 text-sm text-gray-800">{pred.days_until_restock} days</span>
+                                        <span className="ml-2 text-sm text-gray-800">{pred.days_until_restock} days until depletion</span>
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-800">
@@ -84,7 +84,7 @@ const PredictionsTable = () => {
                                     <div className="flex items-center">
                                         <div className="w-full bg-gray-200 rounded-full h-2.5">
                                             <div
-                                                className="bg-blue-600 h-2.5 rounded-full"
+                                                className="bg-[#0a3833] h-2.5 rounded-full"
                                                 style={{ width: `${pred.forecast_confidence}%` }}
                                             ></div>
                                         </div>

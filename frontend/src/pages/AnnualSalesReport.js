@@ -1,12 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bar, Pie } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+
+// Register only required Chart.js components
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 const AnnualSalesReport = () => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [salesData, setSalesData] = useState(null);
-    const [medicineDistribution, setMedicineDistribution] = useState([]);
     const [loading, setLoading] = useState(false);
     const reportRef = useRef(null);
 
@@ -14,7 +32,6 @@ const AnnualSalesReport = () => {
 
     useEffect(() => {
         fetchSalesData();
-        fetchMedicineDistribution();
     }, [selectedYear]);
 
     const fetchSalesData = async () => {
@@ -29,25 +46,19 @@ const AnnualSalesReport = () => {
         setLoading(false);
     };
 
-    const fetchMedicineDistribution = async () => {
-        try {
-            const response = await fetch('http://localhost:5001/api/sales-report/medicine-distribution');
-            const data = await response.json();
-            setMedicineDistribution(data);
-        } catch (error) {
-            console.error('Error fetching medicine distribution:', error);
-        }
-    };
-
     const barChartOptions = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 position: 'top',
             },
             title: {
                 display: true,
-                text: `Monthly Sales Distribution for ${selectedYear}`
+                text: `Monthly Sales Distribution for ${selectedYear}`,
+                font: {
+                    size: 16
+                }
             }
         },
         scales: {
@@ -55,6 +66,14 @@ const AnnualSalesReport = () => {
                 beginAtZero: true,
                 ticks: {
                     callback: (value) => `$${value.toLocaleString()}`
+                },
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.1)'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
                 }
             }
         }
@@ -63,43 +82,17 @@ const AnnualSalesReport = () => {
     const barChartData = {
         labels: salesData?.monthlySales.map(item => item.month) || [],
         datasets: [{
-            label: 'Monthly Sales ($)',
+            label: 'Monthly Sales',
             data: salesData?.monthlySales.map(item => item.sales) || [],
-            backgroundColor: 'rgba(53, 162, 235, 0.5)',
+            backgroundColor: 'rgba(53, 162, 235, 0.7)',
             borderColor: 'rgb(53, 162, 235)',
-            borderWidth: 1
+            borderWidth: 1,
+            borderRadius: 4,
+            maxBarThickness: 50
         }]
     };
 
-    const pieChartData = {
-        labels: medicineDistribution.map(item => item.name),
-        datasets: [{
-            data: medicineDistribution.map(item => item.quantity),
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.5)',
-                'rgba(54, 162, 235, 0.5)',
-                'rgba(255, 206, 86, 0.5)',
-                'rgba(75, 192, 192, 0.5)',
-                'rgba(153, 102, 255, 0.5)',
-                'rgba(255, 159, 64, 0.5)',
-                'rgba(94, 114, 228, 0.5)',
-                'rgba(233, 236, 239, 0.5)'
-            ]
-        }]
-    };
 
-    const pieChartOptions = {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'right'
-            },
-            title: {
-                display: true,
-                text: 'Medicine Sales Distribution'
-            }
-        }
-    };
 
     const downloadPDF = async () => {
         const canvas = await html2canvas(reportRef.current);
@@ -128,7 +121,7 @@ const AnnualSalesReport = () => {
                     </select>
                     <button
                         onClick={downloadPDF}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        className="px-4 py-2 bg-[#0a3833] text-white rounded-lg hover:bg-[#0a3833]/80 transition-colors"
                         disabled={loading || !salesData}
                     >
                         Download PDF
@@ -138,39 +131,36 @@ const AnnualSalesReport = () => {
 
             {loading ? (
                 <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1B5E20]"></div>
                 </div>
             ) : (
                 <div ref={reportRef} className="space-y-6">
                     {salesData?.hasSales ? (
                         <>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                                 <div className="bg-white p-6 rounded-lg shadow-md">
                                     <h3 className="text-lg font-semibold text-gray-700 mb-2">Total Annual Sales</h3>
-                                    <p className="text-3xl font-bold text-blue-600">
+                                    <p className="text-3xl font-bold text-[#0a3833]">
                                         ${salesData.totalAnnualSales.toLocaleString()}
                                     </p>
                                 </div>
                                 <div className="bg-white p-6 rounded-lg shadow-md">
                                     <h3 className="text-lg font-semibold text-gray-700 mb-2">Average Monthly Sales</h3>
-                                    <p className="text-3xl font-bold text-green-600">
+                                    <p className="text-3xl font-bold text-[#1B5E20]">
                                         ${(salesData.totalAnnualSales / 12).toLocaleString()}
                                     </p>
                                 </div>
                                 <div className="bg-white p-6 rounded-lg shadow-md">
                                     <h3 className="text-lg font-semibold text-gray-700 mb-2">Highest Monthly Sales</h3>
-                                    <p className="text-3xl font-bold text-purple-600">
+                                    <p className="text-3xl font-bold text-[#1B5E20]">
                                         ${Math.max(...salesData.monthlySales.map(m => m.sales)).toLocaleString()}
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="bg-white p-6 rounded-lg shadow-md">
-                                    <Bar options={barChartOptions} data={barChartData} />
-                                </div>
-                                <div className="bg-white p-6 rounded-lg shadow-md">
-                                    <Pie options={pieChartOptions} data={pieChartData} />
+                            <div className="bg-white p-6 rounded-lg shadow-md">
+                                <div style={{ height: '500px' }}>
+                                    <Bar key={`bar-${selectedYear}`} options={barChartOptions} data={barChartData} />
                                 </div>
                             </div>
 

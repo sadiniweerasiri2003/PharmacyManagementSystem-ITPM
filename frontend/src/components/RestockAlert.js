@@ -90,7 +90,7 @@ const RestockAlert = ({ limit = 5 }) => {
                                         ? 'text-red-600 font-bold'
                                         : 'text-[#0a3833]'
                                     }`}>
-                                        {item.days_until_restock} days left until restock needed
+                                        {item.days_until_restock} days left until stock depletion
                                     </span>
                                     <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                                         item.days_until_restock === 0 
