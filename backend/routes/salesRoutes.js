@@ -179,5 +179,76 @@ router.delete("/:invoiceId", async (req, res) => {
     }
 });
 
+// Get annual sales data
+router.get('/annual', async (req, res) => {
+  try {
+    const annualSales = await Sales.aggregate([
+      {
+        $group: {
+          _id: { $year: "$orderdate_time" },
+          total: { $sum: { $sum: "$medicines.totalprice" } }
+        }
+      },
+      { $project: { year: "$_id", total: 1, _id: 0 } },
+      { $sort: { year: 1 } }
+    ]);
+    res.json(annualSales);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get monthly sales data
+router.get('/monthly', async (req, res) => {
+  try {
+    const monthlyData = await Sales.aggregate([
+      {
+        $group: {
+          _id: { 
+            year: { $year: "$orderdate_time" },
+            month: { $month: "$orderdate_time" }
+          },
+          total: { $sum: { $sum: "$medicines.totalprice" } }
+        }
+      },
+      { 
+        $project: { 
+          month: { $concat: [
+            { $toString: "$_id.month" },
+            "/",
+            { $toString: "$_id.year" }
+          ]},
+          total: 1,
+          _id: 0 
+        } 
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+    res.json(monthlyData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get medicine sales statistics
+router.get('/medicine-stats', async (req, res) => {
+  try {
+    const medicineStats = await Sales.aggregate([
+      { $unwind: "$medicines" },
+      {
+        $group: {
+          _id: "$medicines.name",
+          quantity: { $sum: "$medicines.qty_sold" }
+        }
+      },
+      { $project: { name: "$_id", quantity: 1, _id: 0 } },
+      { $sort: { quantity: -1 } },
+      { $limit: 10 }
+    ]);
+    res.json(medicineStats);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;
